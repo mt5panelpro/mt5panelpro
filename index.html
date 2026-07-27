@@ -23,6 +23,7 @@ body{min-height:100vh}
 .buy{color:var(--blue);font-size:16px;font-weight:500}.sell{color:var(--red);font-size:16px;font-weight:500}
 .profit{font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.05;width:92px;text-align:right;white-space:nowrap}
 .profit.pos{color:var(--blue)}.profit.neg{color:var(--red)}
+#history .profit{font-size:16px;font-weight:500}
 .sub{display:grid;grid-template-columns:minmax(0,1fr) 170px;column-gap:12px;margin-top:6px;color:var(--muted);font-size:13px;font-weight:400;font-variant-numeric:tabular-nums}.sub span:last-child{text-align:right;white-space:nowrap}
 .empty{text-align:center;color:#686868;padding:52px 0;font-size:14px}
 .tabs{display:flex;background:#1a1a1a;border:1px solid #303030;border-radius:28px;padding:4px;position:sticky;top:10px;z-index:4;margin:82px 22px 0}
@@ -32,15 +33,19 @@ body{min-height:100vh}
 .totals{padding:12px 0 118px;border-top:1px solid #202020}
 .totals .r{display:flex;justify-content:space-between;margin:6px 0;font-size:18px;font-weight:400}
 .totals b{font-size:19px;font-weight:500;font-variant-numeric:tabular-nums}
-.nav{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(470px,calc(100% - 48px));display:grid;grid-template-columns:repeat(2,1fr);gap:0;padding:4px;background:#181818;border:1px solid #343434;border-radius:38px;z-index:20;overflow:hidden}
-.nav button{border:0;background:transparent;color:#f4f4f4;border-radius:34px;padding:6px 4px 5px;font-size:13px;font-weight:500;font-family:inherit;min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
-.nav button .navicon{display:block;width:38px;height:38px;margin:0 auto 5px}
+.nav{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(430px,calc(100% - 72px));display:grid;grid-template-columns:repeat(2,1fr);gap:0;padding:3px;background:#181818;border:1px solid #343434;border-radius:32px;z-index:20;overflow:hidden}
+.nav button{border:0;background:transparent;color:#f4f4f4;border-radius:29px;padding:4px 4px 3px;font-size:12px;font-weight:500;font-family:inherit;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.nav button .navicon{display:block;width:31px;height:31px;margin:0 auto 3px}
 .nav button .navicon svg{display:block;width:100%;height:100%}
 .nav button.active{background:#454545;color:#2f9dff}
 .nav button.active .stroke{stroke:#2f9dff}
 .nav button.active .fill{fill:#2f9dff}
 .nav button:not(.active) .stroke{stroke:#f1f1f1}
 .nav button:not(.active) .fill{fill:#f1f1f1}
+
+body.history-mode .screen{min-height:auto;padding-bottom:0}
+body.history-mode .totals{padding-bottom:0}
+body.history-mode .nav{position:relative;left:auto;bottom:auto;transform:none;margin:8px auto 18px}
 @media(min-width:700px){.screen{padding-top:24px}.float{margin-top:50px}.tabs{margin-top:50px}}
 </style>
 </head>
@@ -103,7 +108,7 @@ body{min-height:100vh}
 
 <script>
 const KEY='mt5_trade_single_live_v9';
-const PRICE_URL='http://127.0.0.1:5000/price';
+const PRICE_URL='https://diff-enjoying-recommends-component.trycloudflare.com/price';
 let latestQuote=null;
 let quoteError='';
 let fetchingQuote=false;
@@ -333,7 +338,7 @@ function renderHistory(filter='all'){
   $('#commissionTotal').textContent=money(cm);
   $('#balanceTotal').textContent=money(bal(s));
 }
-function showPage(id){$$('.page').forEach(x=>x.classList.toggle('active',x.id===id));$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==='history'){renderHistory('all');requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'})))}}
+function showPage(id){document.body.classList.toggle('history-mode',id==='history');$$('.page').forEach(x=>x.classList.toggle('active',x.id===id));$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==='history'){renderHistory('all');requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'})))}}
 $$('.nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
 $$('[data-filter]').forEach(b=>b.onclick=()=>renderHistory(b.dataset.filter));
 renderTrade();renderHistory();tick();setInterval(tick,1100);
