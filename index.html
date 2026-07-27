@@ -14,24 +14,24 @@ body{min-height:100vh}
 .page{display:none}.page.active{display:block}
 .top{display:none}
 .float{font-size:20px;font-weight:600;color:var(--blue);text-align:center;margin:72px 0 44px;letter-spacing:.1px}
-.summary{display:grid;grid-template-columns:1fr auto;gap:7px 14px;font-size:14px;line-height:1.2;font-weight:400}
+.summary{display:grid;grid-template-columns:1fr auto;gap:7px 14px;font-size:16px;line-height:1.2;font-weight:400}
 .summary .v{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
-.section{margin:14px -12px 0;padding:7px 12px;background:#080808;border-top:1px solid #101010;border-bottom:1px solid #101010;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:space-between}.section .more{color:#777;font-size:9px;font-weight:700;line-height:1;letter-spacing:2px;transform:translateY(-1px)}
+.section{margin:14px -12px 0;padding:7px 12px;background:#080808;border-top:1px solid #101010;border-bottom:1px solid #101010;font-size:16px;font-weight:500;display:flex;align-items:center;justify-content:space-between}.section .more{color:#777;font-size:9px;font-weight:700;line-height:1;letter-spacing:2px;transform:translateY(-1px)}
 .order{padding:13px 0 12px;border-bottom:1px solid #0d0d0d}
 .row{display:grid;grid-template-columns:minmax(0,1fr) 92px;align-items:flex-start;column-gap:12px}
-.symbol{font-size:13px;font-weight:500;letter-spacing:0}
-.buy{color:var(--blue);font-size:13px;font-weight:500;letter-spacing:0}.sell{color:var(--red);font-size:13px;font-weight:500;letter-spacing:0}
-.profit{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.05;width:92px;justify-self:end;text-align:right;white-space:nowrap}
+ .symbol{font-size:16px;font-weight:500;letter-spacing:0}
+ .buy{color:var(--blue);font-size:16px;font-weight:500;letter-spacing:0} .sell{color:var(--red);font-size:16px;font-weight:500;letter-spacing:0}
+ .profit{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.05;width:92px;justify-self:end;text-align:right;white-space:nowrap}
 .profit.pos{color:var(--blue)}.profit.neg{color:var(--red)}
-#history .profit{font-size:22px;font-weight:600}
-.sub{display:grid;grid-template-columns:minmax(0,1fr) 170px;column-gap:12px;margin-top:5px;color:var(--muted);font-size:15px;font-weight:400;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:0}.sub span:last-child{text-align:right;white-space:nowrap}
+#history .profit{font-size:16px;font-weight:600}
+.sub{display:grid;grid-template-columns:minmax(0,1fr) 170px;column-gap:12px;margin-top:5px;color:var(--muted);font-size:16px;font-weight:400;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:0}.sub span:last-child{text-align:right;white-space:nowrap}
 .empty{text-align:center;color:#686868;padding:52px 0;font-size:12px}
 .tabs{display:flex;background:#1a1a1a;border:1px solid #303030;border-radius:28px;padding:4px;position:sticky;top:10px;z-index:4;margin:82px 22px 0}
-.tabs button{flex:1;border:0;background:transparent;color:#f4f4f5;border-radius:23px;padding:10px 5px;font-size:14px;font-weight:500;font-family:inherit}
+.tabs button{flex:1;border:0;background:transparent;color:#f4f4f5;border-radius:23px;padding:10px 5px;font-size:16px;font-weight:500;font-family:inherit}
 .tabs button.active{background:#494949}
 #historyList{margin-top:4px}
 .totals{padding:12px 0 8px;border-top:1px solid #202020}
-.totals .r{display:flex;justify-content:space-between;margin:6px 0;font-size:15px;font-weight:400}
+.totals .r{display:flex;justify-content:space-between;margin:6px 0;font-size:16px;font-weight:400}
 .totals b{font-size:16px;font-weight:500;font-variant-numeric:tabular-nums}
 .nav{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);width:min(390px,calc(100% - 92px));display:grid;grid-template-columns:repeat(2,1fr);gap:0;padding:3px;background:#181818;border:1px solid #343434;border-radius:28px;z-index:20;overflow:hidden}
 .nav button{border:0;background:transparent;color:#f4f4f4;border-radius:25px;padding:3px 4px 2px;font-size:9px;font-weight:500;font-family:inherit;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.02}
