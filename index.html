@@ -1,460 +1,342 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>Gold Trading UI</title>
+<title>MT5 Trading</title>
 <style>
-:root{
-  --line:#1d1d1d;--muted:#929292;--blue:#2798ff;--red:#ff515b;--green:#29c66f;
-}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;min-height:100%;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-body{overflow-x:hidden}
-.app{width:100%;min-height:100dvh;background:#000;padding-top:env(safe-area-inset-top);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
-.notice{padding:6px 12px;text-align:center;background:#201900;color:#e9c655;font-size:10px;border-bottom:1px solid #4d3d00}
-.topbar{height:57px;display:grid;grid-template-columns:50px 1fr 50px;align-items:center;border-bottom:1px solid var(--line);padding:0 7px}
-.topbar button{border:0;background:transparent;color:#aaa;font-size:25px;height:48px}
-.title{text-align:center;font-size:20px;font-weight:750}
-.live{display:flex;justify-content:center;align-items:center;gap:7px;padding:9px 12px 0;color:#8f8f8f;font-size:12px}
-.dot{width:8px;height:8px;border-radius:50%;background:#d4a600}.dot.ok{background:var(--green)}.dot.err{background:var(--red)}
-.goal{text-align:center;color:#a5a5a5;font-size:13px;padding:10px 14px 0}
-.floating{text-align:center;padding:10px 14px 13px;font-size:36px;font-weight:760;font-variant-numeric:tabular-nums}
-.blue{color:var(--blue)}.red{color:var(--red)}
-.progress-wrap{padding:0 14px 14px;border-bottom:1px solid var(--line)}
-.progress-head{display:flex;justify-content:space-between;font-size:13px;color:#aaa;margin-bottom:7px}
-.progress-track{height:8px;background:#181818;border-radius:999px;overflow:hidden}
-.progress-bar{height:100%;width:0;background:#fff;border-radius:999px;transition:width .35s}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px 25px;padding:14px;border-bottom:1px solid var(--line)}
-.stat{display:flex;justify-content:space-between;gap:8px;font-size:15px}.stat span:first-child{color:var(--muted)}.stat strong{font-variant-numeric:tabular-nums}
-.tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
-.tab{padding:14px 8px;border:0;border-bottom:2px solid transparent;background:transparent;color:#777;font-size:17px}
-.tab.active{color:#fff;border-bottom-color:#fff}
-.view{display:none}.view.active{display:block}
-.section{padding:11px 14px;color:#858585;font-size:12px;letter-spacing:.5px;border-bottom:1px solid var(--line)}
-.order,.history-order{padding:12px 14px;border-bottom:1px solid #171717}
-.order-top{display:flex;justify-content:space-between;gap:12px}.symbol{font-size:18px;font-weight:750}.side{margin-left:7px;font-size:14px;font-weight:700}
-.profit{font-size:21px;font-weight:750;font-variant-numeric:tabular-nums}
-.meta{margin-top:5px;display:flex;justify-content:space-between;gap:10px;color:#8e8e8e;font-size:12px;font-variant-numeric:tabular-nums}
-.history-summary{padding:11px 14px;border-bottom:1px solid var(--line)}
-.summary-row{display:flex;justify-content:space-between;padding:6px 0;font-size:17px}.summary-row span:first-child{color:#a0a0a0}
-.bottom{position:fixed;left:0;right:0;bottom:0;height:calc(70px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(4,1fr);background:#090909;border-top:1px solid #262626}
-.nav{border:0;background:transparent;color:#777;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px}.nav b{font-size:21px}.nav.active{color:#fff}
-.modal{position:fixed;inset:0;display:none;align-items:flex-end;background:rgba(0,0,0,.76);z-index:30}.modal.open{display:flex}
-.sheet{width:100%;background:#111;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}
-.sheet h2{margin:0 0 10px}.sheet p{color:#aaa;font-size:14px}.sheet label{display:block;color:#bbb;font-size:13px;margin:12px 0 6px}
-.sheet input{width:100%;background:#050505;color:#fff;border:1px solid #383838;border-radius:10px;padding:12px}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.actions button{border:0;border-radius:10px;padding:12px;background:#2b2b2b;color:#fff}.actions .primary{background:#1976d2}
-@media(min-width:700px){.app{max-width:520px;margin:0 auto;border-left:1px solid #151515;border-right:1px solid #151515}.bottom{left:50%;right:auto;transform:translateX(-50%);width:520px}.modal{align-items:center;justify-content:center}.sheet{max-width:440px;border-radius:18px;padding:20px}}
+:root{--bg:#000;--text:#f2f2f4;--muted:#a9a9ae;--blue:#168cf4;--red:#ff5147;--line:#161616;--nav:#1b1b1b;--active:#484848}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Tahoma,sans-serif}
+body{min-height:100vh}
+.screen{width:min(100%,520px);margin:0 auto;min-height:100vh;padding:32px 12px 112px}
+.page{display:none}.page.active{display:block}
+.top{display:none}
+.float{font-size:20px;font-weight:500;color:var(--blue);text-align:center;margin:72px 0 44px;letter-spacing:.1px}
+.summary{display:grid;grid-template-columns:1fr auto;gap:7px 14px;font-size:18px;line-height:1.2;font-weight:400}
+.summary .v{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
+.section{margin:14px -12px 0;padding:7px 12px;background:#080808;border-top:1px solid #101010;border-bottom:1px solid #101010;font-size:16px;font-weight:500;display:flex;align-items:center;justify-content:space-between}.section .more{color:#777;font-size:11px;font-weight:700;line-height:1;letter-spacing:2px;transform:translateY(-1px)}
+.order{padding:13px 0 12px;border-bottom:1px solid #0d0d0d}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 92px;align-items:flex-start;column-gap:12px}
+.symbol{font-size:16px;font-weight:500}
+.buy{color:var(--blue);font-size:16px;font-weight:500}.sell{color:var(--red);font-size:16px;font-weight:500}
+.profit{font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.05;width:92px;text-align:right;white-space:nowrap}
+.profit.pos{color:var(--blue)}.profit.neg{color:var(--red)}
+.sub{display:grid;grid-template-columns:minmax(0,1fr) 170px;column-gap:12px;margin-top:6px;color:var(--muted);font-size:13px;font-weight:400;font-variant-numeric:tabular-nums}.sub span:last-child{text-align:right;white-space:nowrap}
+.empty{text-align:center;color:#686868;padding:52px 0;font-size:14px}
+.tabs{display:flex;background:#1a1a1a;border:1px solid #303030;border-radius:28px;padding:4px;position:sticky;top:10px;z-index:4;margin:82px 22px 0}
+.tabs button{flex:1;border:0;background:transparent;color:#f4f4f5;border-radius:23px;padding:10px 5px;font-size:17px;font-weight:500;font-family:inherit}
+.tabs button.active{background:#494949}
+#historyList{margin-top:4px}
+.totals{padding:12px 0 118px;border-top:1px solid #202020}
+.totals .r{display:flex;justify-content:space-between;margin:6px 0;font-size:18px;font-weight:400}
+.totals b{font-size:19px;font-weight:500;font-variant-numeric:tabular-nums}
+.nav{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(470px,calc(100% - 48px));display:grid;grid-template-columns:repeat(2,1fr);gap:0;padding:4px;background:#181818;border:1px solid #343434;border-radius:38px;z-index:20;overflow:hidden}
+.nav button{border:0;background:transparent;color:#f4f4f4;border-radius:34px;padding:6px 4px 5px;font-size:13px;font-weight:500;font-family:inherit;min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.nav button .navicon{display:block;width:38px;height:38px;margin:0 auto 5px}
+.nav button .navicon svg{display:block;width:100%;height:100%}
+.nav button.active{background:#454545;color:#2f9dff}
+.nav button.active .stroke{stroke:#2f9dff}
+.nav button.active .fill{fill:#2f9dff}
+.nav button:not(.active) .stroke{stroke:#f1f1f1}
+.nav button:not(.active) .fill{fill:#f1f1f1}
+@media(min-width:700px){.screen{padding-top:24px}.float{margin-top:50px}.tabs{margin-top:50px}}
 </style>
 </head>
 <body>
-<div class="app">
-  
-  <header class="topbar">
-    <button aria-label="เมนู">☰</button>
-    <div id="pageTitle" class="title">Trade</div>
-    <div></div>
-  </header>
-
-  <section id="tradeHeader">
-    <div id="floatingProfit" class="floating blue">+0.00 USD</div>
-
-    <div class="progress-wrap">
-      <div class="progress-head"><span>Progress</span><strong id="progressText">0%</strong></div>
-      <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+<div class="screen">
+  <section id="trade" class="page active">
+    <div id="floating" class="float">0.00 USD</div>
+    <div class="summary">
+      <div>Balance:</div><div id="balance" class="v">0.00</div>
+      <div>Equity:</div><div id="equity" class="v">0.00</div>
+      <div>หลักประกัน:</div><div id="margin" class="v">0.00</div>
+      <div>หลักประกันที่เหลือ:</div><div id="free" class="v">0.00</div>
+      <div>ระดับหลักประกัน (%):</div><div id="level" class="v">0.00</div>
     </div>
+    <div class="section"><span>สถานะ</span><span class="more" aria-hidden="true">•••</span></div>
+    <div id="openOrders"></div>
+  </section>
 
-    <div class="stats">
-      <div class="stat"><span>Balance</span><strong id="balance">2,184.52</strong></div>
-      <div class="stat"><span>Equity</span><strong id="equity">2,184.52</strong></div>
-      <div class="stat"><span>Margin</span><strong id="margin">3.27</strong></div>
-      <div class="stat"><span>Free Margin</span><strong id="freeMargin">2,181.25</strong></div>
-      <div class="stat"><span>Margin Level</span><strong id="marginLevel">66,804.89%</strong></div>
-      <div class="stat"><span>Gold</span><strong id="goldPrice">4,100.000</strong></div>
+  <section id="history" class="page">
+    <div class="tabs">
+      <button class="active" data-filter="all">ทั้งหมด</button>
+      <button data-filter="trade">การซื้อขาย</button>
+      <button data-filter="deposit">ฝากเงิน</button>
+    </div>
+    <div id="historyList"></div>
+    <div class="totals">
+      <div class="r"><span>เงินฝาก</span><b id="depositTotal">0.00</b></div>
+      <div class="r"><span>การถอน</span><b id="withdrawalTotal">0.00</b></div>
+      <div class="r"><span>กำไร</span><b id="profitTotal">0.00</b></div>
+      <div class="r"><span>Swap</span><b id="swapTotal">0.00</b></div>
+      <div class="r"><span>ค่าธรรมเนียม</span><b id="commissionTotal">0.00</b></div>
+      <div class="r"><span>Balance</span><b id="balanceTotal">0.00</b></div>
     </div>
   </section>
 
-  <div class="tabs">
-    <button class="tab active" data-view="tradeView">Trade</button>
-    <button class="tab" data-view="historyView">History</button>
-  </div>
 
-  <section id="tradeView" class="view active">
-    <div class="section">POSITIONS</div>
-    <div id="orders"></div>
-  </section>
-
-  <section id="historyView" class="view">
-    <div class="history-summary">
-      <div class="summary-row"><span>Deposit</span><strong>100.00</strong></div>
-      <div class="summary-row"><span>Withdrawal</span><strong>0.00</strong></div>
-      <div class="summary-row"><span>Profit</span><strong id="closedProfit">2,084.52</strong></div>
-      <div class="summary-row"><span>Swap</span><strong id="totalSwap">0.00</strong></div>
-      <div class="summary-row"><span>Commission</span><strong>0.00</strong></div>
-      <div class="summary-row"><span>Balance</span><strong id="historyBalance">2,184.52</strong></div>
-    </div>
-    <div class="section">CLOSED ORDERS</div>
-    <div id="historyOrders"></div>
-  </section>
 </div>
 
-<nav class="bottom">
-  <button class="nav"><b>↕</b><span>Quotes</span></button>
-  <button class="nav"><b>⌗</b><span>Chart</span></button>
-  <button id="tradeNav" class="nav active"><b>⇄</b><span>Trade</span></button>
-  <button id="historyNav" class="nav"><b>◷</b><span>History</span></button>
+<nav class="nav">
+  <button class="active" data-page="trade">
+    <span class="navicon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none">
+        <rect x="8" y="5" width="48" height="54" rx="3" class="stroke" stroke-width="6"/>
+        <path d="M16 43L27 31L36 38L49 19" class="stroke" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    การซื้อขาย
+  </button>
+  <button data-page="history">
+    <span class="navicon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none">
+        <path d="M15 20H5L10 11" class="stroke" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 20C15 10 25 6 35 8C48 10 57 21 56 34C55 47 44 57 31 57C21 57 13 52 8 44" class="stroke" stroke-width="5" stroke-linecap="round"/>
+        <path d="M32 17V33L22 40" class="stroke" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    ประวัติ
+  </button>
 </nav>
 
-
 <script>
-(() => {
-  const fmt = new Intl.NumberFormat('en-US',{
-    minimumFractionDigits:2,
-    maximumFractionDigits:2
-  });
-
-  const deposit = 100;
-  const dailyTarget = 90;
-  const todayStartProfit = 2084.52;
-
-  /*
-    อัตรา Swap โดยประมาณสำหรับ XAUUSDm lot 0.01 ต่อคืน
-    ปรับตัวเลข 2 บรรทัดนี้ได้ตามโบรกเกอร์/ประเภทบัญชี
-  */
-  const SWAP_BUY_PER_NIGHT = -0.18;
-  const SWAP_SELL_PER_NIGHT = -0.08;
-  const TRIPLE_SWAP_DAY = 3; // 0=อาทิตย์, 1=จันทร์, 2=อังคาร, 3=พุธ
-
-  let closedProfit = todayStartProfit;
-  let marketPrice = 4100.000;
-  let ticket = 61023001;
-  const marginPerOrder = 1.09;
-
-  const closedOrders = [
-    closed('buy', 4090.310, 4093.820, 35.10, -0.18),
-    closed('sell', 4102.440, 4098.960, 34.80, -0.08),
-    closed('buy', 4080.250, 4086.770, 65.20, -0.54)
-  ];
-
-  const savedOpenSwaps = JSON.parse(
-    localStorage.getItem('gold_ui_open_swaps') || '[0,0,0]'
-  );
-
-  const orders = [
-    order('buy', marketPrice - 0.30, savedOpenSwaps[0] || 0),
-    order('sell', marketPrice + 0.55, savedOpenSwaps[1] || 0),
-    order('buy', marketPrice - 0.10, savedOpenSwaps[2] || 0)
-  ];
-
-  function order(side, openPrice, swap = 0){
-    return {
-      ticket: ticket++,
-      side,
-      lot: 0.01,
-      openPrice,
-      currentPrice: marketPrice,
-      priceProfit: 0,
-      swap,
-      openedAt: new Date()
-    };
-  }
-
-  function closed(side, openPrice, closePrice, profit, swap = 0){
-    return {
-      ticket: ticket++,
-      side,
-      lot: 0.01,
-      openPrice,
-      closePrice,
-      profit,
-      swap,
-      closedAt: new Date(Date.now() - Math.random() * 3600000)
-    };
-  }
-
-  function setStatus(text,type){
-    /* ซ่อนข้อความสถานะจากหน้าจอ */
-  }
-
-  function priceProfit(order){
-    const movement = order.side === 'buy'
-      ? order.currentPrice - order.openPrice
-      : order.openPrice - order.currentPrice;
-
-    return movement * 10;
-  }
-
-  function netProfit(order){
-    return order.priceProfit + order.swap;
-  }
-
-  function closedSwapTotal(){
-    return closedOrders.reduce((sum, item) => sum + (item.swap || 0), 0);
-  }
-
-  function accountBalance(){
-    return deposit + closedProfit + closedSwapTotal();
-  }
-
-  function thaiDateKey(date = new Date()){
-    return new Intl.DateTimeFormat('en-CA',{
-      timeZone:'Asia/Bangkok',
-      year:'numeric',
-      month:'2-digit',
-      day:'2-digit'
-    }).format(date);
-  }
-
-  function parseDateKey(key){
-    const [year, month, day] = key.split('-').map(Number);
-    return new Date(Date.UTC(year, month - 1, day));
-  }
-
-  function dateKeyFromUtc(date){
-    return [
-      date.getUTCFullYear(),
-      String(date.getUTCMonth() + 1).padStart(2,'0'),
-      String(date.getUTCDate()).padStart(2,'0')
-    ].join('-');
-  }
-
-  function applyOneRollover(rolloverDate){
-    const multiplier = rolloverDate.getUTCDay() === TRIPLE_SWAP_DAY ? 3 : 1;
-
-    orders.forEach(item => {
-      const rate = item.side === 'buy'
-        ? SWAP_BUY_PER_NIGHT
-        : SWAP_SELL_PER_NIGHT;
-
-      item.swap += rate * multiplier;
-    });
-
-    saveOpenSwaps();
-  }
-
-  function applyMissedRollovers(){
-    const todayKey = thaiDateKey();
-    let lastKey = localStorage.getItem('gold_ui_last_swap_date');
-
-    if(!lastKey){
-      localStorage.setItem('gold_ui_last_swap_date', todayKey);
-      return;
-    }
-
-    let cursor = parseDateKey(lastKey);
-    const today = parseDateKey(todayKey);
-    let applied = 0;
-
-    while(cursor < today && applied < 14){
-      cursor.setUTCDate(cursor.getUTCDate() + 1);
-      applyOneRollover(cursor);
-      applied++;
-    }
-
-    localStorage.setItem('gold_ui_last_swap_date', todayKey);
-  }
-
-  function saveOpenSwaps(){
-    localStorage.setItem(
-      'gold_ui_open_swaps',
-      JSON.stringify(orders.map(item => item.swap))
-    );
-  }
-
-  function render(){
-    const balance = accountBalance();
-    const floating = orders.reduce((sum,item) => sum + netProfit(item), 0);
-    const equity = balance + floating;
-    const margin = orders.length * marginPerOrder;
-    const free = equity - margin;
-    const level = margin ? equity / margin * 100 : 0;
-    const todayProfit = Math.max(0, closedProfit - todayStartProfit);
-    const progress = Math.min(100, todayProfit / dailyTarget * 100);
-    const historySwap = closedSwapTotal();
-
-    const fp = document.getElementById('floatingProfit');
-    fp.textContent = `${floating >= 0 ? '+' : ''}${fmt.format(floating)} USD`;
-    fp.className = `floating ${floating >= 0 ? 'blue' : 'red'}`;
-
-    document.getElementById('progressText').textContent = `${progress.toFixed(0)}%`;
-    document.getElementById('progressBar').style.width = `${progress}%`;
-    document.getElementById('balance').textContent = fmt.format(balance);
-    document.getElementById('equity').textContent = fmt.format(equity);
-    document.getElementById('margin').textContent = fmt.format(margin);
-    document.getElementById('freeMargin').textContent = fmt.format(free);
-    document.getElementById('marginLevel').textContent = `${fmt.format(level)}%`;
-    document.getElementById('goldPrice').textContent = marketPrice.toFixed(3);
-    document.getElementById('closedProfit').textContent = fmt.format(closedProfit);
-    document.getElementById('totalSwap').textContent =
-      `${historySwap >= 0 ? '+' : ''}${fmt.format(historySwap)}`;
-    document.getElementById('historyBalance').textContent = fmt.format(balance);
-
-    document.getElementById('orders').innerHTML = orders.map(item => {
-      const net = netProfit(item);
-
-      return `
-        <article class="order">
-          <div class="order-top">
-            <div>
-              <span class="symbol">XAUUSDm</span>
-              <span class="side ${item.side === 'buy' ? 'blue' : 'red'}">
-                ${item.side} 0.01
-              </span>
-            </div>
-            <div class="profit ${net >= 0 ? 'blue' : 'red'}">
-              ${net >= 0 ? '+' : ''}${fmt.format(net)}
-            </div>
-          </div>
-          <div class="meta">
-            <span>
-              #${item.ticket} &nbsp;
-              ${item.openPrice.toFixed(3)} → ${item.currentPrice.toFixed(3)}
-            </span>
-            <span>Swap ${item.swap >= 0 ? '+' : ''}${fmt.format(item.swap)}</span>
-          </div>
-        </article>
-      `;
-    }).join('');
-
-    document.getElementById('historyOrders').innerHTML =
-      closedOrders.slice().reverse().map(item => {
-        const net = item.profit + item.swap;
-
-        return `
-          <article class="history-order">
-            <div class="order-top">
-              <div>
-                <span class="symbol">XAUUSDm</span>
-                <span class="side ${item.side === 'buy' ? 'blue' : 'red'}">
-                  ${item.side} 0.01
-                </span>
-              </div>
-              <div class="profit ${net >= 0 ? 'blue' : 'red'}">
-                ${net >= 0 ? '+' : ''}${fmt.format(net)}
-              </div>
-            </div>
-            <div class="meta">
-              <span>
-                ${item.openPrice.toFixed(3)} → ${item.closePrice.toFixed(3)}
-              </span>
-              <span>Swap ${item.swap >= 0 ? '+' : ''}${fmt.format(item.swap)}</span>
-            </div>
-          </article>
-        `;
-      }).join('');
-  }
-
-  function applyPrice(price){
-    marketPrice = price;
-
-    orders.forEach(item => {
-      item.currentPrice = price;
-      item.priceProfit = priceProfit(item);
-    });
-
-    render();
-  }
-
-  async function fetchRealPrice(){
-    const key = localStorage.getItem('td_api_key') || '';
-
-    if(!key){
-      setStatus('ใช้ราคาสำรอง — กดรูปเฟืองเพื่อใส่ API Key','');
-      return;
-    }
-
-    try{
-      const url =
-        `https://api.twelvedata.com/price?symbol=${encodeURIComponent('XAU/USD')}` +
-        `&apikey=${encodeURIComponent(key)}`;
-
-      const response = await fetch(url,{cache:'no-store'});
-      const data = await response.json();
-
-      if(!response.ok || !data.price){
-        throw new Error(data.message || 'โหลดราคาไม่ได้');
+const KEY='mt5_trade_single_live_v9';
+const PRICE_URL='http://127.0.0.1:5000/price';
+let latestQuote=null;
+let quoteError='';
+let fetchingQuote=false;
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+function money(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function seededTrades(){
+  const start=new Date('2026-03-02T08:15:00+07:00');
+  const end=new Date('2026-07-24T18:30:00+07:00');
+  const target=12486.73;
+  let seed=918273,out=[],daily=[],d=new Date(start),id=1;
+  const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+  while(d<=end){
+    const day=d.getDay();
+    if(day!==0&&day!==6){
+      const dayTarget=82+rnd()*38;
+      const count=5+Math.floor(rnd()*4);
+      let vals=[],sum=0;
+      for(let i=0;i<count;i++){
+        let p=(i===count-1)?0:(rnd()<0.18?-(4+rnd()*9):(12+rnd()*18));
+        p=+p.toFixed(2);vals.push(p);sum+=p;
       }
-
-      const price = Number(data.price);
-
-      if(!Number.isFinite(price)){
-        throw new Error('ราคาไม่ถูกต้อง');
-      }
-
-      applyPrice(price);
-      setStatus(
-        `XAU/USD อัปเดต ${new Date().toLocaleTimeString('th-TH')}`,
-        'ok'
-      );
-    }catch(error){
-      console.error(error);
-      setStatus('เชื่อมต่อราคาจริงไม่สำเร็จ ตรวจ API Key','err');
+      vals[count-1]=+(dayTarget-sum).toFixed(2);
+      daily.push({date:new Date(d),vals});
+    }
+    d.setDate(d.getDate()+1);
+  }
+  let rawTotal=daily.reduce((a,x)=>a+x.vals.reduce((b,v)=>b+v,0),0);
+  const scale=target/rawTotal;
+  let total=0;
+  for(const day of daily){
+    for(let i=0;i<day.vals.length;i++){
+      let p=+(day.vals[i]*scale).toFixed(2);
+      if(day===daily[daily.length-1]&&i===day.vals.length-1)p=+(target-total).toFixed(2);
+      const side=rnd()>.49?'buy':'sell';
+      const open=4250+(rnd()-.5)*420;
+      const dist=Math.abs(p)/10;
+      const win=p>=0;
+      const close=side==='buy'?open+(win?dist:-dist):open-(win?dist:-dist);
+      const hour=8+Math.floor(rnd()*15),minute=Math.floor(rnd()*60),second=Math.floor(rnd()*60);
+      const t=new Date(day.date);t.setHours(hour,minute,second,0);
+      const heldOvernight=rnd()<0.035;
+      const swap=heldOvernight?+(side==='buy'?-(0.06+rnd()*0.08):-(0.03+rnd()*0.06)).toFixed(2):0;
+      out.push({id:id++,symbol:'XAUUSDm',side,lot:'0.01',open:open.toFixed(3),close:close.toFixed(3),profit:p,swap,commission:0,time:t.toISOString()});
+      total=+(total+p).toFixed(2);
     }
   }
+  return out.sort((a,b)=>new Date(b.time)-new Date(a.time));
+}
+function seededWithdrawals(){
+  return[
+    {id:'withdraw-2026-04',amount:600,time:'2026-04-09T10:14:00+07:00',monthKey:'2026-04'},
+    {id:'withdraw-2026-05',amount:600,time:'2026-05-16T11:26:00+07:00',monthKey:'2026-05'},
+    {id:'withdraw-2026-06',amount:600,time:'2026-06-11T09:47:00+07:00',monthKey:'2026-06'},
+    {id:'withdraw-2026-07',amount:600,time:'2026-07-18T13:08:00+07:00',monthKey:'2026-07'}
+  ];
+}
+function defaults(){return{deposit:100,depositTime:'2026-03-02T08:00:00+07:00',withdrawals:seededWithdrawals(),closed:seededTrades(),open:null,auto:true,swapTotal:0,commissionTotal:0,lastSwapKey:''}}
+function normalize(s){
+  const d=defaults();
+  s=s&&typeof s==='object'?s:d;
+  for(const k of Object.keys(d))if(s[k]===undefined)s[k]=d[k];
+  if(!Array.isArray(s.closed))s.closed=[];
+  s.closed=s.closed.map(x=>({...x,swap:Number(x.swap||0),commission:Number(x.commission||0)}));
+  if(!Array.isArray(s.withdrawals))s.withdrawals=[];
+  s.withdrawals=s.withdrawals.map(x=>({id:x.id||Date.now(),amount:Math.abs(Number(x.amount||600)),time:x.time||new Date().toISOString(),monthKey:x.monthKey||''}));
+  return s;
+}
+function load(){try{return normalize(JSON.parse(localStorage.getItem(KEY))||defaults())}catch(e){return defaults()}}
+function save(s){localStorage.setItem(KEY,JSON.stringify(s))}
+function closedProfit(s){return s.closed.reduce((a,x)=>a+Number(x.profit||0),0)}
+function totalSwap(s){return Number(s.swapTotal||0)+s.closed.reduce((a,x)=>a+Number(x.swap||0),0)}
+function totalCommission(s){return Number(s.commissionTotal||0)+s.closed.reduce((a,x)=>a+Number(x.commission||0),0)}
+function totalWithdrawals(s){return (s.withdrawals||[]).reduce((a,x)=>a+Math.abs(Number(x.amount||0)),0)}
+function bal(s){return Number(s.deposit||0)-totalWithdrawals(s)+closedProfit(s)+totalSwap(s)+totalCommission(s)}
 
-  function animateBetweenFetches(){
-    marketPrice += localStorage.getItem('td_api_key')
-      ? (Math.random() - 0.5) * 0.025
-      : (Math.random() - 0.49) * 0.12;
+function bangkokParts(date=new Date()){
+  const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bangkok',weekday:'short',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(date);
+  const o={};for(const p of parts)if(p.type!=='literal')o[p.type]=p.value;
+  return{weekday:o.weekday,year:+o.year,month:+o.month,day:+o.day,hour:+o.hour,minute:+o.minute,second:+o.second};
+}
+function marketStatus(date=new Date()){
+  const t=bangkokParts(date),mins=t.hour*60+t.minute;
+  const wd={Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6,Sun:0}[t.weekday];
+  let open=false;
+  if(wd>=1&&wd<=4)open=mins>=300||mins<240;
+  else if(wd===5)open=mins>=300||mins<240;
+  else if(wd===6)open=mins<240;
+  else if(wd===0)open=false;
+  return{...t,open,mins,dayIndex:wd};
+}
+function swapKeyAtClose(t){return `${t.year}-${String(t.month).padStart(2,'0')}-${String(t.day).padStart(2,'0')}`}
 
-    orders.forEach(item => {
-      item.currentPrice = marketPrice;
-      item.priceProfit = priceProfit(item);
-    });
+function withdrawalDueDate(year,month){
+  let day=1;
+  const wd=new Date(Date.UTC(year,month-1,day)).getUTCDay();
+  if(wd===6)day=3;
+  else if(wd===0)day=2;
+  return new Date(Date.UTC(year,month-1,day,3,0,0)); // 10:00 เวลาไทย
+}
+function maybeApplyMonthlyWithdrawals(s,date=new Date()){
+  const start=new Date(s.depositTime||'2026-03-02T08:00:00+07:00');
+  const startThai=bangkokParts(start),nowThai=bangkokParts(date);
+  let y=startThai.year,m=startThai.month+1;
+  if(m===13){m=1;y++}
+  while(y<nowThai.year||(y===nowThai.year&&m<=nowThai.month)){
+    const key=`${y}-${String(m).padStart(2,'0')}`;
+    const due=withdrawalDueDate(y,m);
+    const exists=(s.withdrawals||[]).some(x=>x.monthKey===key);
+    if(!exists&&date.getTime()>=due.getTime()&&bal(s)>=600){
+      s.withdrawals.push({id:`withdraw-${key}`,amount:600,time:due.toISOString(),monthKey:key});
+    }
+    m++;if(m===13){m=1;y++}
+  }
+}
+function maybeApplySwap(s){
+  if(!s.open)return;
+  const t=marketStatus();
+  const inDailyClose=t.mins>=240&&t.mins<300;
+  if(!inDailyClose)return;
+  const key=swapKeyAtClose(t);
+  if(s.open.lastSwapKey===key)return;
+  const base=s.open.side==='buy'?-0.08:-0.05;
+  const variation=(Math.random()*0.04)-0.02;
+  const charge=+(base+variation).toFixed(2);
+  s.open.swap=+(Number(s.open.swap||0)+charge).toFixed(2);
+  s.open.lastSwapKey=key;
+}
+function createOrder(q){
+  const side=Math.random()>.5?'buy':'sell';
+  const p=side==='buy'?Number(q.ask):Number(q.bid);
+  return{symbol:q.symbol||'XAUUSDm',side,lot:'0.01',open:p,price:p,profit:0,swap:0,commission:0,started:Date.now(),lastSwapKey:''}
+}
 
-    render();
+async function fetchQuote(){
+  if(fetchingQuote)return latestQuote;
+  fetchingQuote=true;
+  try{
+    const r=await fetch(PRICE_URL,{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const q=await r.json();
+    if(!q.ok)throw new Error(q.error||'Price service returned ok=false');
+    const bid=Number(q.bid),ask=Number(q.ask);
+    if(!Number.isFinite(bid)||!Number.isFinite(ask))throw new Error('Invalid bid/ask');
+    latestQuote={...q,bid,ask,receivedAt:Date.now()};
+    quoteError='';
+  }catch(e){
+    quoteError=e&&e.message?e.message:String(e);
+  }finally{
+    fetchingQuote=false;
+  }
+  return latestQuote;
+}
+function closeOrder(s){
+  if(!s.open)return;
+  s.closed.unshift({id:Date.now(),symbol:s.open.symbol,side:s.open.side,lot:s.open.lot,open:s.open.open.toFixed(3),close:s.open.price.toFixed(3),profit:+s.open.profit.toFixed(2),swap:+Number(s.open.swap||0).toFixed(2),commission:+Number(s.open.commission||0).toFixed(2),time:new Date().toISOString()});
+  s.open=null;save(s)
+}
+async function tick(){
+  const q=await fetchQuote();
+  let s=load(),m=marketStatus();
+  maybeApplyMonthlyWithdrawals(s);
+  maybeApplySwap(s);
+
+  const live=!!(q&&q.market_live!==false&&Date.now()-q.receivedAt<10000);
+  if(s.auto&&m.open&&live){
+    if(!s.open)s.open=createOrder(q);
+    else{
+      // Buy ปิดด้วย Bid, Sell ปิดด้วย Ask เพื่อคิดสเปรดเหมือนตลาดจริง
+      s.open.price=s.open.side==='buy'?q.bid:q.ask;
+      s.open.profit=(s.open.side==='buy'?s.open.price-s.open.open:s.open.open-s.open.price)*10;
+      if(Date.now()-s.open.started>26000&&(s.open.profit>18||s.open.profit<-7||Date.now()-s.open.started>52000))closeOrder(s)
+    }
+  }
+  save(s);renderTrade(s,m,q)
+}
+function renderTrade(s=load(),m=marketStatus(),q=latestQuote){
+  const b=bal(s),f=s.open?s.open.profit:0,openSwap=s.open?Number(s.open.swap||0):0;
+  $('#floating').textContent=money(f)+' USD';
+  $('#floating').style.color=f<0?'var(--red)':'var(--blue)';
+  $('#balance').textContent=money(b);
+  $('#equity').textContent=money(b+f+openSwap);
+  $('#margin').textContent=s.open?'2.05':'0.00';
+  $('#free').textContent=money(b+f+openSwap-(s.open?2.05:0));
+  $('#level').textContent=s.open?money((b+f+openSwap)/2.05*100):'0.00';
+  if(s.open){
+    $('#openOrders').innerHTML=`<div class="order"><div class="row"><div><span class="symbol">${s.open.symbol}</span> <span class="${s.open.side}">${s.open.side} ${s.open.lot}</span></div><div class="profit ${s.open.profit>=0?'pos':'neg'}">${money(s.open.profit)}</div></div><div class="sub"><span>${s.open.open.toFixed(3)} → ${s.open.price.toFixed(3)}</span><span></span></div></div>`;
+  }else{
+    let msg='ตลาดปิด';
+    if(m.open){
+      if(quoteError)msg='เชื่อมต่อราคาทองไม่ได้';
+      else if(!q)msg='กำลังเชื่อมต่อราคาทองจริง…';
+      else if(q.market_live===false)msg='ตลาดปิด';
+      else msg='กำลังรอเปิดออเดอร์ใหม่…';
+    }
+    $('#openOrders').innerHTML=`<div class="empty">${msg}</div>`;
+  }
+}
+function renderHistory(filter='all'){
+  const s=load();
+  $$('[data-filter]').forEach(x=>x.classList.toggle('active',x.dataset.filter===filter));
+
+  const items=[];
+  if(filter!=='trade'){
+    items.push({kind:'cash',type:'deposit',amount:Number(s.deposit||0),time:s.depositTime||'2026-03-02T08:00:00+07:00'});
+    for(const x of (s.withdrawals||[]))items.push({kind:'cash',type:'withdrawal',amount:-Math.abs(Number(x.amount||0)),time:x.time});
+  }
+  if(filter!=='deposit'){
+    for(const x of s.closed)items.push({kind:'trade',...x});
   }
 
-  function showView(view){
-    document.querySelectorAll('.view').forEach(item => item.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(item => item.classList.remove('active'));
+  // MT5 เรียงจากรายการเก่าไว้ด้านบน และรายการล่าสุดไว้ล่างสุด
+  items.sort((a,b)=>new Date(a.time)-new Date(b.time));
 
-    document.getElementById(view).classList.add('active');
-    document.querySelector(`[data-view="${view}"]`).classList.add('active');
+  const html=items.map(x=>{
+    if(x.kind==='cash'){
+      return `<div class="order"><div class="row"><div class="symbol">${x.type==='deposit'?'เงินฝาก':'การถอน'}</div><div class="profit ${x.amount>=0?'pos':'neg'}">${money(x.amount)}</div></div><div class="sub"><span>${x.type==='deposit'?'Deposit':'Withdrawal'}</span><span>${new Date(x.time).toLocaleString('sv-SE',{timeZone:'Asia/Bangkok'}).replace('T',' ')}</span></div></div>`;
+    }
+    return `<div class="order"><div class="row"><div><span class="symbol">${x.symbol}</span> <span class="${x.side}">${x.side} ${x.lot}</span></div><div class="profit ${x.profit>=0?'pos':'neg'}">${money(x.profit)}</div></div><div class="sub"><span>${x.open} → ${x.close}</span><span>${new Date(x.time).toLocaleString('sv-SE',{timeZone:'Asia/Bangkok'}).replace('T',' ')}</span></div></div>`;
+  }).join('');
+  $('#historyList').innerHTML=html;
 
-    const historyMode = view === 'historyView';
-
-    document.getElementById('tradeHeader').style.display =
-      historyMode ? 'none' : 'block';
-    document.getElementById('pageTitle').textContent =
-      historyMode ? 'History' : 'Trade';
-
-    document.querySelectorAll('.nav').forEach(item => item.classList.remove('active'));
-    document.getElementById(
-      historyMode ? 'historyNav' : 'tradeNav'
-    ).classList.add('active');
-  }
-
-  document.querySelectorAll('.tab').forEach(button => {
-    button.addEventListener('click', () => showView(button.dataset.view));
-  });
-
-  document.getElementById('tradeNav').addEventListener(
-    'click',
-    () => showView('tradeView')
-  );
-
-  document.getElementById('historyNav').addEventListener(
-    'click',
-    () => showView('historyView')
-  );
-
-  applyMissedRollovers();
-
-  orders.forEach(item => {
-    item.priceProfit = priceProfit(item);
-  });
-
-  render();
-  fetchRealPrice();
-
-  setInterval(fetchRealPrice,15000);
-  setInterval(animateBetweenFetches,700);
-  setInterval(applyMissedRollovers,60000);
-})();
+  const p=closedProfit(s),sw=totalSwap(s),cm=totalCommission(s);
+  $('#depositTotal').textContent=money(s.deposit);
+  $('#withdrawalTotal').textContent=money(-totalWithdrawals(s));
+  $('#profitTotal').textContent=money(p);
+  $('#swapTotal').textContent=money(sw);
+  $('#commissionTotal').textContent=money(cm);
+  $('#balanceTotal').textContent=money(bal(s));
+}
+function showPage(id){$$('.page').forEach(x=>x.classList.toggle('active',x.id===id));$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==='history'){renderHistory('all');requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'})))}}
+$$('.nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+$$('[data-filter]').forEach(b=>b.onclick=()=>renderHistory(b.dataset.filter));
+renderTrade();renderHistory();tick();setInterval(tick,1100);
 </script>
 </body>
 </html>
