@@ -1,785 +1,460 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>MT5 History Thailand</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-            scroll-behavior: smooth;
-        }
-
-        body {
-            margin: 0;
-            font-family: Tahoma, Arial, sans-serif;
-            background: #07101d;
-            color: #ffffff;
-        }
-
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .container {
-            width: min(1180px, 92%);
-            margin: auto;
-        }
-
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(7, 16, 29, 0.96);
-            border-bottom: 1px solid #273750;
-            backdrop-filter: blur(10px);
-        }
-
-        .navbar {
-            min-height: 76px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo {
-            width: 48px;
-            height: 48px;
-            display: grid;
-            place-items: center;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #ffe27a, #b77b00);
-            color: #111111;
-            font-weight: bold;
-            font-size: 17px;
-        }
-
-        .brand-title {
-            margin: 0;
-            color: #f3c75c;
-            font-size: 21px;
-        }
-
-        .brand-subtitle {
-            margin: 4px 0 0;
-            color: #94a2b5;
-            font-size: 13px;
-        }
-
-        nav {
-            display: flex;
-            gap: 22px;
-            color: #c6cfdd;
-            font-size: 14px;
-        }
-
-        nav a:hover {
-            color: #f3c75c;
-        }
-
-        .hero {
-            padding: 55px 0 28px;
-        }
-
-        .hero-box {
-            padding: 38px;
-            border: 1px solid #283953;
-            border-radius: 22px;
-            background:
-                radial-gradient(circle at top right, rgba(243, 199, 92, 0.18), transparent 36%),
-                #101b2c;
-        }
-
-        .hero-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 24px;
-        }
-
-        .hero h2 {
-            margin: 0 0 12px;
-            color: #f3c75c;
-            font-size: clamp(32px, 5vw, 54px);
-        }
-
-        .hero-description {
-            max-width: 730px;
-            color: #aeb9ca;
-            font-size: 17px;
-            line-height: 1.8;
-        }
-
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            padding: 10px 16px;
-            border-radius: 999px;
-            background: #123722;
-            color: #67e39a;
-            white-space: nowrap;
-            font-weight: bold;
-        }
-
-        .status-dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            background: #67e39a;
-            box-shadow: 0 0 12px #67e39a;
-        }
-
-        .account-info {
-            margin-top: 28px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-        }
-
-        .info-item {
-            padding: 17px;
-            border-radius: 14px;
-            background: #0b1525;
-            border: 1px solid #253550;
-        }
-
-        .info-label {
-            display: block;
-            margin-bottom: 8px;
-            color: #8392a8;
-            font-size: 13px;
-        }
-
-        .info-value {
-            color: #ffffff;
-            font-weight: bold;
-        }
-
-        section {
-            padding: 24px 0;
-        }
-
-        .section-title {
-            margin: 0 0 18px;
-            color: #f3c75c;
-            font-size: 25px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            }
-
-        .stat-card {
-            min-height: 150px;
-            padding: 22px;
-            border: 1px solid #273750;
-            border-radius: 17px;
-            background: #111d2e;
-        }
-
-        .stat-card span {
-            color: #8f9eb2;
-            font-size: 14px;
-        }
-
-        .stat-card strong {
-            display: block;
-            margin-top: 13px;
-            font-size: 29px;
-        }
-
-        .stat-card small {
-            display: block;
-            margin-top: 10px;
-            color: #8190a5;
-            line-height: 1.5;
-        }
-
-        .positive {
-            color: #5de391;
-        }
-
-        .negative {
-            color: #ff7474;
-        }
-
-        .gold {
-            color: #f3c75c;
-        }
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 18px;
-        }
-
-        .panel {
-            padding: 22px;
-            border: 1px solid #273750;
-            border-radius: 17px;
-            background: #111d2e;
-        }
-
-        .chart-area {
-            position: relative;
-            height: 310px;
-            margin-top: 20px;
-            overflow: hidden;
-            border-radius: 12px;
-            background:
-                linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-            background-size: 50px 50px;
-        }
-
-        .chart-svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .chart-line {
-            fill: none;
-            stroke: #f3c75c;
-            stroke-width: 4;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .chart-area-fill {
-            fill: url(#chartGradient);
-        }
-
-        .summary-list {
-            display: grid;
-            gap: 12px;
-            margin-top: 18px;
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-            padding: 13px 0;
-            border-bottom: 1px solid #26354c;
-        }
-
-        .summary-row span:first-child {
-            color: #91a0b4;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-            border-radius: 16px;
-            border: 1px solid #273750;
-        }
-
-        table {
-            width: 100%;
-            min-width: 850px;
-            border-collapse: collapse;
-            background: #111d2e;
-        }
-
-        th,
-        td {
-            padding: 15px 14px;
-            text-align: left;
-            border-bottom: 1px solid #273750;
-        }
-
-        th {
-            background: #18263a;
-            color: #f3c75c;
-            font-size: 14px;
-        }
-
-        td {
-            color: #d5dce7;
-            font-size: 14px;
-        }
-
-        .type-buy {
-            color: #61df95;
-            font-weight: bold;
-        }
-
-        .type-sell {
-            color: #ff7f7f;
-            font-weight: bold;
-        }
-
-        .notice {
-            padding: 20px;
-            border: 1px solid #5c4c20;
-            border-radius: 15px;
-            background: #201b0d;
-            color: #d9c98d;
-            line-height: 1.8;
-        }
-
-        .contact-box {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            padding: 25px;
-            border: 1px solid #273750;
-            border-radius: 17px;
-            background: #111d2e;
-        }
-
-        .contact-box h3 {
-            margin: 0 0 8px;
-            color: #f3c75c;
-        }
-
-        .contact-box p {
-            margin: 0;
-            color: #9ba9bb;
-        }
-
-        .contact-button {
-            display: inline-block;
-            padding: 13px 22px;
-            border-radius: 11px;
-            background: #f3c75c;
-            color: #111111;
-            font-weight: bold;
-        }
-
-        .contact-button:hover {
-            background: #ffda73;
-        }
-
-        footer {
-            margin-top: 35px;
-            padding: 28px 0;
-            text-align: center;
-            border-top: 1px solid #24344d;
-            color: #7f8da1;
-        }
-
-        @media (max-width: 950px) {
-            nav {
-                display: none;
-            }
-
-            .account-info,
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .hero-box {
-                padding: 24px;
-            }
-
-            .hero-top {
-                flex-direction: column;
-            }
-
-            .account-info,
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .contact-box {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .brand-title {
-                font-size: 17px;
-            }
-
-            .hero-description {
-                font-size: 15px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Gold Trading UI</title>
+<style>
+:root{
+  --line:#1d1d1d;--muted:#929292;--blue:#2798ff;--red:#ff515b;--green:#29c66f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{overflow-x:hidden}
+.app{width:100%;min-height:100dvh;background:#000;padding-top:env(safe-area-inset-top);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.notice{padding:6px 12px;text-align:center;background:#201900;color:#e9c655;font-size:10px;border-bottom:1px solid #4d3d00}
+.topbar{height:57px;display:grid;grid-template-columns:50px 1fr 50px;align-items:center;border-bottom:1px solid var(--line);padding:0 7px}
+.topbar button{border:0;background:transparent;color:#aaa;font-size:25px;height:48px}
+.title{text-align:center;font-size:20px;font-weight:750}
+.live{display:flex;justify-content:center;align-items:center;gap:7px;padding:9px 12px 0;color:#8f8f8f;font-size:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:#d4a600}.dot.ok{background:var(--green)}.dot.err{background:var(--red)}
+.goal{text-align:center;color:#a5a5a5;font-size:13px;padding:10px 14px 0}
+.floating{text-align:center;padding:10px 14px 13px;font-size:36px;font-weight:760;font-variant-numeric:tabular-nums}
+.blue{color:var(--blue)}.red{color:var(--red)}
+.progress-wrap{padding:0 14px 14px;border-bottom:1px solid var(--line)}
+.progress-head{display:flex;justify-content:space-between;font-size:13px;color:#aaa;margin-bottom:7px}
+.progress-track{height:8px;background:#181818;border-radius:999px;overflow:hidden}
+.progress-bar{height:100%;width:0;background:#fff;border-radius:999px;transition:width .35s}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px 25px;padding:14px;border-bottom:1px solid var(--line)}
+.stat{display:flex;justify-content:space-between;gap:8px;font-size:15px}.stat span:first-child{color:var(--muted)}.stat strong{font-variant-numeric:tabular-nums}
+.tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
+.tab{padding:14px 8px;border:0;border-bottom:2px solid transparent;background:transparent;color:#777;font-size:17px}
+.tab.active{color:#fff;border-bottom-color:#fff}
+.view{display:none}.view.active{display:block}
+.section{padding:11px 14px;color:#858585;font-size:12px;letter-spacing:.5px;border-bottom:1px solid var(--line)}
+.order,.history-order{padding:12px 14px;border-bottom:1px solid #171717}
+.order-top{display:flex;justify-content:space-between;gap:12px}.symbol{font-size:18px;font-weight:750}.side{margin-left:7px;font-size:14px;font-weight:700}
+.profit{font-size:21px;font-weight:750;font-variant-numeric:tabular-nums}
+.meta{margin-top:5px;display:flex;justify-content:space-between;gap:10px;color:#8e8e8e;font-size:12px;font-variant-numeric:tabular-nums}
+.history-summary{padding:11px 14px;border-bottom:1px solid var(--line)}
+.summary-row{display:flex;justify-content:space-between;padding:6px 0;font-size:17px}.summary-row span:first-child{color:#a0a0a0}
+.bottom{position:fixed;left:0;right:0;bottom:0;height:calc(70px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(4,1fr);background:#090909;border-top:1px solid #262626}
+.nav{border:0;background:transparent;color:#777;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px}.nav b{font-size:21px}.nav.active{color:#fff}
+.modal{position:fixed;inset:0;display:none;align-items:flex-end;background:rgba(0,0,0,.76);z-index:30}.modal.open{display:flex}
+.sheet{width:100%;background:#111;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}
+.sheet h2{margin:0 0 10px}.sheet p{color:#aaa;font-size:14px}.sheet label{display:block;color:#bbb;font-size:13px;margin:12px 0 6px}
+.sheet input{width:100%;background:#050505;color:#fff;border:1px solid #383838;border-radius:10px;padding:12px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.actions button{border:0;border-radius:10px;padding:12px;background:#2b2b2b;color:#fff}.actions .primary{background:#1976d2}
+@media(min-width:700px){.app{max-width:520px;margin:0 auto;border-left:1px solid #151515;border-right:1px solid #151515}.bottom{left:50%;right:auto;transform:translateX(-50%);width:520px}.modal{align-items:center;justify-content:center}.sheet{max-width:440px;border-radius:18px;padding:20px}}
+</style>
 </head>
-
 <body>
+<div class="app">
+  
+  <header class="topbar">
+    <button aria-label="เมนู">☰</button>
+    <div id="pageTitle" class="title">Trade</div>
+    <div></div>
+  </header>
 
-<header>
-    <div class="container navbar">
+  <section id="tradeHeader">
+    <div id="floatingProfit" class="floating blue">+0.00 USD</div>
 
-        <div class="brand">
-            <div class="logo">MT5</div>
-
-            <div>
-                <h1 class="brand-title">MT5 History Thailand</h1>
-                <p class="brand-subtitle">เว็บไซต์แสดงประวัติและผลการเทรด</p>
-            </div>
-        </div>
-
-        <nav>
-            <a href="#หน้าแรก">หน้าแรก</a>
-            <a href="#สถิติ">สถิติการเทรด</a>
-            <a href="#ประวัติ">ประวัติการเทรด</a>
-            <a href="#ติดต่อ">ติดต่อเรา</a>
-        </nav>
-
+    <div class="progress-wrap">
+      <div class="progress-head"><span>Progress</span><strong id="progressText">0%</strong></div>
+      <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
     </div>
-</header>
 
-<main>
+    <div class="stats">
+      <div class="stat"><span>Balance</span><strong id="balance">2,184.52</strong></div>
+      <div class="stat"><span>Equity</span><strong id="equity">2,184.52</strong></div>
+      <div class="stat"><span>Margin</span><strong id="margin">3.27</strong></div>
+      <div class="stat"><span>Free Margin</span><strong id="freeMargin">2,181.25</strong></div>
+      <div class="stat"><span>Margin Level</span><strong id="marginLevel">66,804.89%</strong></div>
+      <div class="stat"><span>Gold</span><strong id="goldPrice">4,100.000</strong></div>
+    </div>
+  </section>
 
-    <section class="hero" id="หน้าแรก">
-        <div class="container">
+  <div class="tabs">
+    <button class="tab active" data-view="tradeView">Trade</button>
+    <button class="tab" data-view="historyView">History</button>
+  </div>
 
-            <div class="hero-box">
+  <section id="tradeView" class="view active">
+    <div class="section">POSITIONS</div>
+    <div id="orders"></div>
+  </section>
 
-                <div class="hero-top">
+  <section id="historyView" class="view">
+    <div class="history-summary">
+      <div class="summary-row"><span>Deposit</span><strong>100.00</strong></div>
+      <div class="summary-row"><span>Withdrawal</span><strong>0.00</strong></div>
+      <div class="summary-row"><span>Profit</span><strong id="closedProfit">2,084.52</strong></div>
+      <div class="summary-row"><span>Swap</span><strong id="totalSwap">0.00</strong></div>
+      <div class="summary-row"><span>Commission</span><strong>0.00</strong></div>
+      <div class="summary-row"><span>Balance</span><strong id="historyBalance">2,184.52</strong></div>
+    </div>
+    <div class="section">CLOSED ORDERS</div>
+    <div id="historyOrders"></div>
+  </section>
+</div>
 
-                    <div>
-                        <h2>ผลการเทรด MT5</h2>
+<nav class="bottom">
+  <button class="nav"><b>↕</b><span>Quotes</span></button>
+  <button class="nav"><b>⌗</b><span>Chart</span></button>
+  <button id="tradeNav" class="nav active"><b>⇄</b><span>Trade</span></button>
+  <button id="historyNav" class="nav"><b>◷</b><span>History</span></button>
+</nav>
 
-                        <div class="hero-description">
-                            เว็บไซต์สำหรับแสดงผลการเทรด สถิติ กำไร ขาดทุน
-                            และประวัติการซื้อขายย้อนหลัง เพื่อให้ผู้ชมตรวจสอบข้อมูลได้ง่าย
-                        </div>
-                    </div>
 
-                    <div class="status">
-                        <span class="status-dot"></span>
-                        ระบบทำงานปกติ
-                    </div>
+<script>
+(() => {
+  const fmt = new Intl.NumberFormat('en-US',{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
 
-                </div>
+  const deposit = 100;
+  const dailyTarget = 90;
+  const todayStartProfit = 2084.52;
 
-                <div class="account-info">
+  /*
+    อัตรา Swap โดยประมาณสำหรับ XAUUSDm lot 0.01 ต่อคืน
+    ปรับตัวเลข 2 บรรทัดนี้ได้ตามโบรกเกอร์/ประเภทบัญชี
+  */
+  const SWAP_BUY_PER_NIGHT = -0.18;
+  const SWAP_SELL_PER_NIGHT = -0.08;
+  const TRIPLE_SWAP_DAY = 3; // 0=อาทิตย์, 1=จันทร์, 2=อังคาร, 3=พุธ
 
-                    <div class="info-item">
-                        <span class="info-label">ชื่อระบบ</span>
-                        <span class="info-value">ระบบเทรดทองคำ</span>
-                    </div>
+  let closedProfit = todayStartProfit;
+  let marketPrice = 4100.000;
+  let ticket = 61023001;
+  const marginPerOrder = 1.09;
 
-                    <div class="info-item">
-                        <span class="info-label">ประเภทบัญชี</span>
-                        <span class="info-value">บัญชีทดลอง</span>
-                    </div>
+  const closedOrders = [
+    closed('buy', 4090.310, 4093.820, 35.10, -0.18),
+    closed('sell', 4102.440, 4098.960, 34.80, -0.08),
+    closed('buy', 4080.250, 4086.770, 65.20, -0.54)
+  ];
 
-                    <div class="info-item">
-                        <span class="info-label">โบรกเกอร์</span>
-                        <span class="info-value">Exness</span>
-                    </div>
+  const savedOpenSwaps = JSON.parse(
+    localStorage.getItem('gold_ui_open_swaps') || '[0,0,0]'
+  );
 
-                    <div class="info-item">
-                        <span class="info-label">สินทรัพย์ที่เทรด</span>
-                        <span class="info-value">ทองคำ XAUUSD</span>
-                    </div>
+  const orders = [
+    order('buy', marketPrice - 0.30, savedOpenSwaps[0] || 0),
+    order('sell', marketPrice + 0.55, savedOpenSwaps[1] || 0),
+    order('buy', marketPrice - 0.10, savedOpenSwaps[2] || 0)
+  ];
 
-                </div>
+  function order(side, openPrice, swap = 0){
+    return {
+      ticket: ticket++,
+      side,
+      lot: 0.01,
+      openPrice,
+      currentPrice: marketPrice,
+      priceProfit: 0,
+      swap,
+      openedAt: new Date()
+    };
+  }
 
+  function closed(side, openPrice, closePrice, profit, swap = 0){
+    return {
+      ticket: ticket++,
+      side,
+      lot: 0.01,
+      openPrice,
+      closePrice,
+      profit,
+      swap,
+      closedAt: new Date(Date.now() - Math.random() * 3600000)
+    };
+  }
+
+  function setStatus(text,type){
+    /* ซ่อนข้อความสถานะจากหน้าจอ */
+  }
+
+  function priceProfit(order){
+    const movement = order.side === 'buy'
+      ? order.currentPrice - order.openPrice
+      : order.openPrice - order.currentPrice;
+
+    return movement * 10;
+  }
+
+  function netProfit(order){
+    return order.priceProfit + order.swap;
+  }
+
+  function closedSwapTotal(){
+    return closedOrders.reduce((sum, item) => sum + (item.swap || 0), 0);
+  }
+
+  function accountBalance(){
+    return deposit + closedProfit + closedSwapTotal();
+  }
+
+  function thaiDateKey(date = new Date()){
+    return new Intl.DateTimeFormat('en-CA',{
+      timeZone:'Asia/Bangkok',
+      year:'numeric',
+      month:'2-digit',
+      day:'2-digit'
+    }).format(date);
+  }
+
+  function parseDateKey(key){
+    const [year, month, day] = key.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day));
+  }
+
+  function dateKeyFromUtc(date){
+    return [
+      date.getUTCFullYear(),
+      String(date.getUTCMonth() + 1).padStart(2,'0'),
+      String(date.getUTCDate()).padStart(2,'0')
+    ].join('-');
+  }
+
+  function applyOneRollover(rolloverDate){
+    const multiplier = rolloverDate.getUTCDay() === TRIPLE_SWAP_DAY ? 3 : 1;
+
+    orders.forEach(item => {
+      const rate = item.side === 'buy'
+        ? SWAP_BUY_PER_NIGHT
+        : SWAP_SELL_PER_NIGHT;
+
+      item.swap += rate * multiplier;
+    });
+
+    saveOpenSwaps();
+  }
+
+  function applyMissedRollovers(){
+    const todayKey = thaiDateKey();
+    let lastKey = localStorage.getItem('gold_ui_last_swap_date');
+
+    if(!lastKey){
+      localStorage.setItem('gold_ui_last_swap_date', todayKey);
+      return;
+    }
+
+    let cursor = parseDateKey(lastKey);
+    const today = parseDateKey(todayKey);
+    let applied = 0;
+
+    while(cursor < today && applied < 14){
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+      applyOneRollover(cursor);
+      applied++;
+    }
+
+    localStorage.setItem('gold_ui_last_swap_date', todayKey);
+  }
+
+  function saveOpenSwaps(){
+    localStorage.setItem(
+      'gold_ui_open_swaps',
+      JSON.stringify(orders.map(item => item.swap))
+    );
+  }
+
+  function render(){
+    const balance = accountBalance();
+    const floating = orders.reduce((sum,item) => sum + netProfit(item), 0);
+    const equity = balance + floating;
+    const margin = orders.length * marginPerOrder;
+    const free = equity - margin;
+    const level = margin ? equity / margin * 100 : 0;
+    const todayProfit = Math.max(0, closedProfit - todayStartProfit);
+    const progress = Math.min(100, todayProfit / dailyTarget * 100);
+    const historySwap = closedSwapTotal();
+
+    const fp = document.getElementById('floatingProfit');
+    fp.textContent = `${floating >= 0 ? '+' : ''}${fmt.format(floating)} USD`;
+    fp.className = `floating ${floating >= 0 ? 'blue' : 'red'}`;
+
+    document.getElementById('progressText').textContent = `${progress.toFixed(0)}%`;
+    document.getElementById('progressBar').style.width = `${progress}%`;
+    document.getElementById('balance').textContent = fmt.format(balance);
+    document.getElementById('equity').textContent = fmt.format(equity);
+    document.getElementById('margin').textContent = fmt.format(margin);
+    document.getElementById('freeMargin').textContent = fmt.format(free);
+    document.getElementById('marginLevel').textContent = `${fmt.format(level)}%`;
+    document.getElementById('goldPrice').textContent = marketPrice.toFixed(3);
+    document.getElementById('closedProfit').textContent = fmt.format(closedProfit);
+    document.getElementById('totalSwap').textContent =
+      `${historySwap >= 0 ? '+' : ''}${fmt.format(historySwap)}`;
+    document.getElementById('historyBalance').textContent = fmt.format(balance);
+
+    document.getElementById('orders').innerHTML = orders.map(item => {
+      const net = netProfit(item);
+
+      return `
+        <article class="order">
+          <div class="order-top">
+            <div>
+              <span class="symbol">XAUUSDm</span>
+              <span class="side ${item.side === 'buy' ? 'blue' : 'red'}">
+                ${item.side} 0.01
+              </span>
             </div>
-
-        </div>
-    </section>
-
-    <section id="สถิติ">
-        <div class="container">
-
-            <h2 class="section-title">สถิติการเทรดโดยรวม</h2>
-
-            <div class="stats-grid">
-
-                <div class="stat-card">
-                    <span>เงินทุนเริ่มต้น</span>
-                    <strong>10,000 USD</strong>
-                    <small>ยอดเงินเมื่อเริ่มต้นระบบ</small>
-                </div>
-
-                <div class="stat-card">
-                    <span>ยอดเงินปัจจุบัน</span>
-                    <strong>22,500 USD</strong>
-                    <small>ยอดเงินคงเหลือล่าสุด</small>
-                </div>
-
-                <div class="stat-card">
-                    <span>กำไรรวม</span>
-                    <strong class="positive">+12,500 USD</strong>
-                    <small class="positive">เติบโต +125%</small>
-                </div>
-                <div class="stat-card">
-                    <span>การขาดทุนสูงสุด</span>
-                    <strong class="negative">8.40%</strong>
-                    <small>ช่วงขาดทุนสูงสุดของบัญชี</small>
-                </div>
-
-                <div class="stat-card">
-                    <span>อัตราการชนะ</span>
-                    <strong class="gold">78%</strong>
-                    <small>คำนวณจากออเดอร์ที่ปิดแล้ว</small>
-                </div>
-
-                <div class="stat-card">
-                    <span>จำนวนออเดอร์ทั้งหมด</span>
-                    <strong>1,256</strong>
-                    <small>รายการซื้อขายที่ปิดแล้ว</small>
-                </div>
-
-                <div class="stat-card">
-                    <span>กำไรเฉลี่ยต่อวัน</span>
-                    <strong class="positive">+350 USD</strong>
-                    <small>ค่าเฉลี่ยจากข้อมูลที่ผ่านมา</small>
-                </div>
-
-                <div class="stat-card">
-                    <span>วันที่เริ่มใช้งาน</span>
-                    <strong>1 ก.ค. 2569</strong>
-                    <small>อัปเดตข้อมูลล่าสุดวันนี้</small>
-                </div>
-
+            <div class="profit ${net >= 0 ? 'blue' : 'red'}">
+              ${net >= 0 ? '+' : ''}${fmt.format(net)}
             </div>
+          </div>
+          <div class="meta">
+            <span>
+              #${item.ticket} &nbsp;
+              ${item.openPrice.toFixed(3)} → ${item.currentPrice.toFixed(3)}
+            </span>
+            <span>Swap ${item.swap >= 0 ? '+' : ''}${fmt.format(item.swap)}</span>
+          </div>
+        </article>
+      `;
+    }).join('');
 
-        </div>
-    </section>
+    document.getElementById('historyOrders').innerHTML =
+      closedOrders.slice().reverse().map(item => {
+        const net = item.profit + item.swap;
 
-    <section>
-        <div class="container content-grid">
-
-            <div class="panel">
-
-                <h2 class="section-title">กราฟการเติบโตของบัญชี</h2>
-
-                <div class="chart-area">
-
-                    <svg class="chart-svg" viewBox="0 0 800 300" preserveAspectRatio="none">
-
-                        <defs>
-                            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#f3c75c" stop-opacity="0.35"></stop>
-                                <stop offset="100%" stop-color="#f3c75c" stop-opacity="0"></stop>
-                            </linearGradient>
-                        </defs>
-
-                        <path
-                            class="chart-area-fill"
-                            d="M0,250
-                               L70,235
-                               L130,245
-                               L200,205
-                               L260,215
-                               L320,170
-                               L390,180
-                               L450,130
-                               L520,145
-                               L590,95
-                               L660,110
-                               L730,55
-                               L800,35
-                               L800,300
-                               L0,300 Z">
-                        </path>
-
-                        <path
-                            class="chart-line"
-                            d="M0,250
-                               L70,235
-                               L130,245
-                               L200,205
-                               L260,215
-                               L320,170
-                               L390,180
-                               L450,130
-                               L520,145
-                               L590,95
-                               L660,110
-                               L730,55
-                               L800,35">
-                        </path>
-
-                    </svg>
-
-                </div>
-
+        return `
+          <article class="history-order">
+            <div class="order-top">
+              <div>
+                <span class="symbol">XAUUSDm</span>
+                <span class="side ${item.side === 'buy' ? 'blue' : 'red'}">
+                  ${item.side} 0.01
+                </span>
+              </div>
+              <div class="profit ${net >= 0 ? 'blue' : 'red'}">
+                ${net >= 0 ? '+' : ''}${fmt.format(net)}
+              </div>
             </div>
-
-            <div class="panel">
-
-                <h2 class="section-title">ข้อมูลบัญชี</h2>
-
-                <div class="summary-list">
-
-                    <div class="summary-row">
-                        <span>แพลตฟอร์ม</span>
-                        <strong>MetaTrader 5</strong>
-                    </div>
-
-                    <div class="summary-row">
-                        <span>สกุลเงินบัญชี</span>
-                        <strong>ดอลลาร์สหรัฐ</strong>
-                    </div>
-
-                    <div class="summary-row">
-                        <span>เลเวอเรจ</span>
-                        <strong>1:500</strong>
-                    </div>
-
-                    <div class="summary-row">
-                        <span>ประเภทการเทรด</span>
-                        <strong>ระบบอัตโนมัติ</strong>
-                    </div>
-
-                    <div class="summary-row">
-                        <span>เวลาที่ใช้</span>
-                        <strong>เวลาไทย</strong>
-                    </div>
-
-                    <div class="summary-row">
-                        <span>อัปเดตล่าสุด</span>
-                        <strong>วันนี้ 01:30 น.</strong>
-                    </div>
-
-                </div>
-
+            <div class="meta">
+              <span>
+                ${item.openPrice.toFixed(3)} → ${item.closePrice.toFixed(3)}
+              </span>
+              <span>Swap ${item.swap >= 0 ? '+' : ''}${fmt.format(item.swap)}</span>
             </div>
+          </article>
+        `;
+      }).join('');
+  }
 
-        </div>
-    </section>
+  function applyPrice(price){
+    marketPrice = price;
 
-    <section id="ประวัติ">
-        <div class="container">
+    orders.forEach(item => {
+      item.currentPrice = price;
+      item.priceProfit = priceProfit(item);
+    });
 
-            <h2 class="section-title">ประวัติการเทรดล่าสุด</h2>
+    render();
+  }
 
-            <div class="table-wrap">
+  async function fetchRealPrice(){
+    const key = localStorage.getItem('td_api_key') || '';
 
-                <table>
+    if(!key){
+      setStatus('ใช้ราคาสำรอง — กดรูปเฟืองเพื่อใส่ API Key','');
+      return;
+    }
 
-                    <thead>
-                        <tr>
-                            <th>วันที่</th>
-                            <th>สินทรัพย์</th>
-                            <th>ประเภท</th>
-                            <th>ขนาดล็อต</th>
-                            <th>ราคาเปิด</th>
-                            <th>ราคาปิด</th>
-                            <th>กำไรหรือขาดทุน</th>
-                        </tr>
-                    </thead>
+    try{
+      const url =
+        `https://api.twelvedata.com/price?symbol=${encodeURIComponent('XAU/USD')}` +
+        `&apikey=${encodeURIComponent(key)}`;
 
-                    <tbody>
+      const response = await fetch(url,{cache:'no-store'});
+      const data = await response.json();
 
-                        <tr>
-                            <td>12 ก.ค. 2569</td>
-                            <td>ทองคำ</td>
-                            <td class="type-buy">ซื้อ</td>
-                            <td>0.10</td>
-                            <td>3,350.20</td>
-                            <td>3,365.50</td>
-                            <td class="positive">+153.00 USD</td>
-                        </tr>
+      if(!response.ok || !data.price){
+        throw new Error(data.message || 'โหลดราคาไม่ได้');
+      }
 
-                        <tr>
-                            <td>12 ก.ค. 2569</td>
-                            <td>ทองคำ</td>
-                            <td class="type-sell">ขาย</td>
-                            <td>0.10</td>
-                            <td>3,370.80</td>
-                            <td>3,362.10</td>
-                            <td class="positive">+87.00 USD</td>
-                        </tr>
+      const price = Number(data.price);
 
-                        <tr>
-                            <td>11 ก.ค. 2569</td>
-                            <td>ทองคำ</td>
-                            <td class="type-buy">ซื้อ</td>
-                            <td>0.10</td>
-                            <td>3,340.00</td>
-                            <td>3,336.00</td>
-                            <td class="negative">-40.00 USD</td>
-                        </tr>
+      if(!Number.isFinite(price)){
+        throw new Error('ราคาไม่ถูกต้อง');
+      }
 
-                        <tr>
-                            <td>11 ก.ค. 2569</td>
-                            <td>ทองคำ</td>
-                            <td class="type-sell">ขาย</td>
-                            <td>0.10</td>
-                            <td>3,355.00</td>
-                            <td>3,345.00</td>
-                            <td class="positive">+100.00 USD</td>
-                        </tr>
+      applyPrice(price);
+      setStatus(
+        `XAU/USD อัปเดต ${new Date().toLocaleTimeString('th-TH')}`,
+        'ok'
+      );
+    }catch(error){
+      console.error(error);
+      setStatus('เชื่อมต่อราคาจริงไม่สำเร็จ ตรวจ API Key','err');
+    }
+  }
 
-                        <tr>
-                            <td>10 ก.ค. 2569</td>
-                            <td>ทองคำ</td>
-                            <td class="type-buy">ซื้อ</td>
-                            <td>0.10</td>
-                            <td>3,320.00</td>
-                            <td>3,331.00</td>
-                            <td class="positive">+110.00 USD</td>
-                        </tr>
+  function animateBetweenFetches(){
+    marketPrice += localStorage.getItem('td_api_key')
+      ? (Math.random() - 0.5) * 0.025
+      : (Math.random() - 0.49) * 0.12;
 
-                    </tbody>
+    orders.forEach(item => {
+      item.currentPrice = marketPrice;
+      item.priceProfit = priceProfit(item);
+    });
 
-                </table>
+    render();
+  }
 
-            </div>
+  function showView(view){
+    document.querySelectorAll('.view').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(item => item.classList.remove('active'));
 
-        </div>
-    </section>
+    document.getElementById(view).classList.add('active');
+    document.querySelector(`[data-view="${view}"]`).classList.add('active');
 
-    <section>
-        <div class="container">
+    const historyMode = view === 'historyView';
 
-            <div class="notice">
+    document.getElementById('tradeHeader').style.display =
+      historyMode ? 'none' : 'block';
+    document.getElementById('pageTitle').textContent =
+      historyMode ? 'History' : 'Trade';
 
-                <strong>คำชี้แจงสำคัญ:</strong>
-                ตัวเลขทั้งหมดในเว็บไซต์นี้เป็นข้อมูลตัวอย่างสำหรับการออกแบบเว็บไซต์
-                ก่อนนำไปเผยแพร่หรือให้ลูกค้าดู ควรเปลี่ยนเป็นข้อมูลจริงของบัญชี
-                และควรระบุให้ชัดเจนว่าเป็นบัญชีจริง บัญชีทดลอง
-                หรือผลการทดสอบย้อนหลัง การลงทุนและการซื้อขายมีความเสี่ยง
-                ผู้ใช้งานควรศึกษาข้อมูลก่อนตัดสินใจ
+    document.querySelectorAll('.nav').forEach(item => item.classList.remove('active'));
+    document.getElementById(
+      historyMode ? 'historyNav' : 'tradeNav'
+    ).classList.add('active');
+  }
 
-            </div>
+  document.querySelectorAll('.tab').forEach(button => {
+    button.addEventListener('click', () => showView(button.dataset.view));
+  });
 
-        </div>
-    </section>
+  document.getElementById('tradeNav').addEventListener(
+    'click',
+    () => showView('tradeView')
+  );
 
-    <section id="ติดต่อ">
-        <div class="container">
+  document.getElementById('historyNav').addEventListener(
+    'click',
+    () => showView('historyView')
+  );
 
-            <div class="contact-box">
+  applyMissedRollovers();
 
-                <div>
-                    <h3>ติดต่อสอบถามข้อมูล</h3>
-                    <p>สอบถามรายละเอียดเกี่ยวกับระบบเทรดและผลการใช้งาน</p>
-                </div>
+  orders.forEach(item => {
+    item.priceProfit = priceProfit(item);
+  });
 
-                <a class="contact-button" href="#">
-                    ติดต่อเรา
-                </a>
+  render();
+  fetchRealPrice();
 
-            </div>
-
-        </div>
-    </section>
-
-</main>
-
-<footer>
-    © 2026 MT5 History Thailand — สงวนลิขสิทธิ์
-</footer>
-
+  setInterval(fetchRealPrice,15000);
+  setInterval(animateBetweenFetches,700);
+  setInterval(applyMissedRollovers,60000);
+})();
+</script>
 </body>
 </html>
