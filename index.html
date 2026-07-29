@@ -348,7 +348,8 @@ async function tick(){
     else{
       // Buy ปิดด้วย Bid, Sell ปิดด้วย Ask เพื่อคิดสเปรดเหมือนตลาดจริง
       s.open.price=s.open.side==='buy'?q.bid:q.ask;
-      s.open.profit=(s.open.side==='buy'?s.open.price-s.open.open:s.open.open-s.open.price)*10;
+      s.open.profit=(s.open.side==='buy'?s.open.price-s.open.open:s.open.open-s.open.price)*2.5;
+      if(s.open.profit<-30)s.open.profit=-30;
       // คงออเดอร์ปัจจุบันไว้เพื่อไม่ให้ยอดกำไรรายวันเกินแผน 200–300 USD
     }
   }
