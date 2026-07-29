@@ -305,10 +305,18 @@ function maybeApplySwap(s){
   s.open.swap=+(Number(s.open.swap||0)+charge).toFixed(2);
   s.open.lastSwapKey=key;
 }
+function randomCloseAmount(min,max){
+  return +(min+Math.random()*(max-min)).toFixed(2);
+}
 function createOrder(q){
   const side=Math.random()>.5?'buy':'sell';
   const p=side==='buy'?Number(q.ask):Number(q.bid);
-  return{symbol:q.symbol||'XAUUSDm',side,lot:'0.01',open:p,price:p,profit:0,swap:0,commission:0,started:Date.now(),lastSwapKey:''}
+  return{
+    symbol:q.symbol||'XAUUSDm',side,lot:'0.01',open:p,price:p,profit:0,swap:0,commission:0,
+    started:Date.now(),lastSwapKey:'',
+    profitTarget:randomCloseAmount(0.01,100),
+    lossTarget:-randomCloseAmount(0.01,30)
+  }
 }
 
 async function fetchQuote(){
@@ -349,8 +357,22 @@ async function tick(){
       // Buy ปิดด้วย Bid, Sell ปิดด้วย Ask เพื่อคิดสเปรดเหมือนตลาดจริง
       s.open.price=s.open.side==='buy'?q.bid:q.ask;
       s.open.profit=(s.open.side==='buy'?s.open.price-s.open.open:s.open.open-s.open.price)*2.5;
-      if(s.open.profit<-30)s.open.profit=-30;
-      // คงออเดอร์ปัจจุบันไว้เพื่อไม่ให้ยอดกำไรรายวันเกินแผน 200–300 USD
+      if(!Number.isFinite(Number(s.open.profitTarget)))s.open.profitTarget=randomCloseAmount(0.01,100);
+      if(!Number.isFinite(Number(s.open.lossTarget)))s.open.lossTarget=-randomCloseAmount(0.01,30);
+
+      if(s.open.profit<=s.open.lossTarget){
+        // ใช้ยอดเดียวกันทั้งตอนปิดออเดอร์ ประวัติ และ Balance
+        s.open.profit=+Number(s.open.lossTarget).toFixed(2);
+        closeOrder(s);
+        s=load();
+        if(m.open&&live)s.open=createOrder(q);
+      }else if(s.open.profit>=s.open.profitTarget){
+        // ใช้ยอดเดียวกันทั้งตอนปิดออเดอร์ ประวัติ และ Balance
+        s.open.profit=+Number(s.open.profitTarget).toFixed(2);
+        closeOrder(s);
+        s=load();
+        if(m.open&&live)s.open=createOrder(q);
+      }
     }
   }
   save(s);renderTrade(s,m,q)
