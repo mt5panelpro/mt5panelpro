@@ -106,7 +106,7 @@ body.history-mode .totals{padding-bottom:0;margin-top:18px;margin-bottom:18px;tr
 </nav>
 
 <script>
-const KEY='mt5_trade_single_live_v11';
+const KEY='mt5_trade_single_live_v12';
 const PRICE_URL='https://diff-enjoying-recommends-component.trycloudflare.com/price';
 let latestQuote=null;
 let quoteError='';
@@ -115,7 +115,7 @@ const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 function money(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function seededTrades(){
   const baselineKey='2026-07-28';
-  const baselineTarget=25489.00;
+  const baselineTargetCents=2548900; // 25,489.00 USD
   let seed=918273,out=[],days=[],id=1;
   const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
   const nowThai=bangkokParts(new Date());
@@ -130,35 +130,67 @@ function seededTrades(){
     d.setUTCDate(d.getUTCDate()+1);
   }
 
+  // กำไรสุทธิรายวัน 200.00–300.00 USD และยอดถึง 28 ก.ค. รวม 25,489.00 USD พอดี
   const baselineDays=days.filter(key=>key<=baselineKey);
-  const targets=new Map(baselineDays.map(key=>[key,200]));
-  let remaining=Math.round(baselineTarget)-baselineDays.length*200;
+  const targets=new Map(baselineDays.map(key=>[key,20000]));
+  let remaining=baselineTargetCents-baselineDays.length*20000;
   let cursor=0;
   while(remaining>0){
     const key=baselineDays[cursor%baselineDays.length];
-    if(targets.get(key)<300){targets.set(key,targets.get(key)+1);remaining--}
+    const room=30000-targets.get(key);
+    if(room>0){
+      const add=Math.min(room,remaining,1+Math.floor(rnd()*97));
+      targets.set(key,targets.get(key)+add);
+      remaining-=add;
+    }
     cursor+=1+Math.floor(rnd()*7);
   }
-  for(const key of days)if(!targets.has(key))targets.set(key,200+Math.floor(rnd()*101));
+  for(const key of days){
+    if(!targets.has(key))targets.set(key,20000+Math.floor(rnd()*10001));
+  }
 
-  function splitWins(total,count){
-    const vals=Array(count).fill(50);
-    let left=total-count*50;
-    while(left>0){
-      const i=Math.floor(rnd()*count);
-      if(vals[i]<100){vals[i]++;left--}
+  // แบ่งยอดกำไรเป็นออเดอร์ละ 50.00–100.00 USD โดยมีเศษสตางค์
+  function splitWinsCents(totalCents,count){
+    const vals=Array(count).fill(5000);
+    let left=totalCents-count*5000;
+    for(let i=0;i<count;i++){
+      const slots=count-i-1;
+      const minForRest=0;
+      const maxHere=Math.min(5000,left-minForRest);
+      const add=i===count-1?left:Math.floor(rnd()*(maxHere+1));
+      vals[i]+=add;
+      left-=add;
+    }
+    // กระจายใหม่หากตัวท้ายเกินขอบเขต และทำให้รายการส่วนใหญ่มีทศนิยมไม่กลม
+    for(let i=count-1;i>=0;i--){
+      if(vals[i]>10000){
+        let extra=vals[i]-10000; vals[i]=10000;
+        for(let j=0;j<count&&extra>0;j++){
+          if(j===i)continue;
+          const give=Math.min(extra,10000-vals[j]);
+          vals[j]+=give;extra-=give;
+        }
+      }
+    }
+    for(let i=0;i<count;i++){
+      if(vals[i]%100===0){
+        const j=(i+1)%count;
+        if(vals[i]<10000&&vals[j]>5000){vals[i]+=37;vals[j]-=37}
+      }
     }
     return vals;
   }
 
   for(const key of days){
-    const dayTarget=targets.get(key);
-    const loss=20+Math.floor(rnd()*11);
-    const winCount=dayTarget<=270?3:4;
-    const vals=[...splitWins(dayTarget+loss,winCount),-loss];
-    for(let i=vals.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[vals[i],vals[j]]=[vals[j],vals[i]]}
+    const dayTargetCents=targets.get(key);
+    let lossCents=2000+Math.floor(rnd()*1001);
+    if(lossCents%100===0)lossCents+=47;
+    const winCount=dayTargetCents<=27000?3:4;
+    const valsCents=[...splitWinsCents(dayTargetCents+lossCents,winCount),-lossCents];
+    for(let i=valsCents.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[valsCents[i],valsCents[j]]=[valsCents[j],valsCents[i]]}
     let hour=6+Math.floor(rnd()*15),minute=Math.floor(rnd()*60);
-    for(const profit of vals){
+    for(const profitCents of valsCents){
+      const profit=profitCents/100;
       const side=rnd()>.49?'buy':'sell';
       const open=4250+(rnd()-.5)*420;
       const dist=Math.abs(profit)/10;
@@ -169,7 +201,6 @@ function seededTrades(){
       const second=Math.floor(rnd()*60);
       const time=new Date(`${key}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:${String(second).padStart(2,'0')}+07:00`).toISOString();
       const tradeId=id++;
-      // บางออเดอร์ถือข้ามคืน จึงมีค่า Swap ในประวัติ (วันพุธคิดมากขึ้น)
       const heldOvernight=(tradeId%17===0)||(tradeId%29===0);
       const weekday=new Date(`${key}T12:00:00+07:00`).getDay();
       let swap=0;
@@ -178,7 +209,7 @@ function seededTrades(){
         swap=-(weekday===3?base*3:base);
         swap=+swap.toFixed(2);
       }
-      out.push({id:`seed-${key}-${tradeId}`,symbol:'XAUUSDm',side,lot:'0.01',open:open.toFixed(3),close:close.toFixed(3),profit,swap,commission:0,time});
+      out.push({id:`seed-${key}-${tradeId}`,symbol:'XAUUSDm',side,lot:'0.01',open:open.toFixed(3),close:close.toFixed(3),profit:+profit.toFixed(2),swap,commission:0,time});
     }
   }
   return out.sort((a,b)=>new Date(b.time)-new Date(a.time));
@@ -301,7 +332,8 @@ async function fetchQuote(){
 }
 function closeOrder(s){
   if(!s.open)return;
-  s.closed.unshift({id:Date.now(),symbol:s.open.symbol,side:s.open.side,lot:s.open.lot,open:s.open.open.toFixed(3),close:s.open.price.toFixed(3),profit:+s.open.profit.toFixed(2),swap:+Number(s.open.swap||0).toFixed(2),commission:+Number(s.open.commission||0).toFixed(2),time:new Date().toISOString()});
+  const closedProfit=+Number(s.open.profit).toFixed(2);
+  s.closed.unshift({id:Date.now(),symbol:s.open.symbol,side:s.open.side,lot:s.open.lot,open:s.open.open.toFixed(3),close:s.open.price.toFixed(3),profit:closedProfit,swap:+Number(s.open.swap||0).toFixed(2),commission:+Number(s.open.commission||0).toFixed(2),time:new Date().toISOString()});
   s.open=null;save(s)
 }
 async function tick(){
