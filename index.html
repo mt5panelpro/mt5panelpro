@@ -229,7 +229,7 @@ function seededWithdrawals(){
   }
   return out;
 }
-function defaults(){return{deposit:100,depositTime:'2026-03-02T08:00:00+07:00',withdrawals:seededWithdrawals(),closed:seededTrades(),open:null,auto:true,swapTotal:0,commissionTotal:0,lastSwapKey:''}}
+function defaults(){return{deposit:100,depositTime:'2026-03-02T08:00:00+07:00',withdrawals:seededWithdrawals(),closed:seededTrades(),open:null,auto:true,swapTotal:0,commissionTotal:0,lastSwapKey:'',dailyTargets:{}}}
 function normalize(s){
   const d=defaults();
   s=s&&typeof s==='object'?s:d;
@@ -239,6 +239,11 @@ function normalize(s){
   const existingIds=new Set(s.closed.map(x=>String(x.id)));
   for(const x of generated)if(!existingIds.has(String(x.id)))s.closed.push(x);
   s.closed=s.closed.map(x=>({...x,swap:Number(x.swap||0),commission:Number(x.commission||0)}));
+  const nowThai=bangkokParts(new Date());
+  const todayKey=`${nowThai.year}-${String(nowThai.month).padStart(2,'0')}-${String(nowThai.day).padStart(2,'0')}`;
+  // ไม่ใช้รายการ seed ของวันนี้ เพื่อให้กำไรวันนี้เกิดจากออเดอร์ที่ปิดจริงบนหน้าเว็บ
+  s.closed=s.closed.filter(x=>!(String(x.id||'').startsWith(`seed-${todayKey}-`)));
+  if(!s.dailyTargets||typeof s.dailyTargets!=='object')s.dailyTargets={};
   if(!Array.isArray(s.withdrawals))s.withdrawals=[];
   s.withdrawals=s.withdrawals.map(x=>({id:x.id||Date.now(),amount:Math.abs(Number(x.amount||2000)),time:x.time||new Date().toISOString(),monthKey:x.monthKey||''}));
   return s;
@@ -308,15 +313,64 @@ function maybeApplySwap(s){
 function randomCloseAmount(min,max){
   return +(min+Math.random()*(max-min)).toFixed(2);
 }
-function createOrder(q){
+function thaiDateKey(date=new Date()){
+  const t=bangkokParts(date);
+  return `${t.year}-${String(t.month).padStart(2,'0')}-${String(t.day).padStart(2,'0')}`;
+}
+function todayLiveProfit(s){
+  const key=thaiDateKey();
+  return +(s.closed||[]).filter(x=>String(x.id||'').startsWith(`live-${key}-`)).reduce((a,x)=>a+Number(x.profit||0),0).toFixed(2);
+}
+function getDailyTarget(s){
+  const key=thaiDateKey();
+  if(!s.dailyTargets||typeof s.dailyTargets!=='object')s.dailyTargets={};
+  if(!Number.isFinite(Number(s.dailyTargets[key])))s.dailyTargets[key]=randomCloseAmount(200,300);
+  return +Number(s.dailyTargets[key]).toFixed(2);
+}
+function createOrder(s,q){
   const side=Math.random()>.5?'buy':'sell';
   const p=side==='buy'?Number(q.ask):Number(q.bid);
+  const target=getDailyTarget(s);          // เป้าของวันนี้สุ่ม 200.00–300.00 USD
+  const made=todayLiveProfit(s);           // กำไรสุทธิจากออเดอร์สดที่ปิดวันนี้
+  const floor=200,ceiling=300;
+  const remaining=+(target-made).toFixed(2);
+
+  // ราคาลอยยังอิงทองจริง แต่ผลตอนปิดถูกควบคุมให้ยอดสุทธิรายวันเข้าสู่ 200–300 USD
+  // และหลังถึงเป้าแล้ว ออเดอร์ยังเปิด–ปิดต่อโดยยอดรวมจะไม่หลุดช่วง 200–300 USD
+  let plannedResult;
+  if(made<target){
+    // เร่งให้ถึงเป้าของวันแน่นอน: ไม้หลักเป็นกำไร 0.01–100.00 USD
+    // แทรกไม้ขาดทุนได้เฉพาะเมื่อยังมีระยะพอ และไม่ทำให้การไล่เป้าหยุดลง
+    if(made>=60&&remaining>60&&Math.random()<0.18){
+      plannedResult=-randomCloseAmount(0.01,Math.min(30,made));
+    }else{
+      const maxWin=Math.min(100,remaining);
+      const minWin=Math.min(maxWin,Math.max(0.01,Math.min(35,remaining)));
+      plannedResult=remaining<=100?remaining:randomCloseAmount(minWin,maxWin);
+    }
+  }else{
+    // ถึงเป้าแล้วก็ยังมีออเดอร์ตลอด โดยคุมยอดรวมไม่ให้ต่ำกว่า 200 หรือเกิน 300
+    const lossRoom=+(made-floor).toFixed(2);
+    const profitRoom=+(ceiling-made).toFixed(2);
+    const canLose=lossRoom>=0.01;
+    const canWin=profitRoom>=0.01;
+
+    if(canLose&&(!canWin||Math.random()<0.55)){
+      plannedResult=-randomCloseAmount(0.01,Math.min(30,lossRoom));
+    }else if(canWin){
+      plannedResult=randomCloseAmount(0.01,Math.min(100,profitRoom));
+    }else{
+      // กรณีขอบเขตพอดี ให้ขาดทุนเล็กน้อยก่อน แล้วไม้ถัดไปจะชดเชยภายในช่วงเดิม
+      plannedResult=-Math.min(0.01,Math.max(0.01,lossRoom));
+    }
+  }
+  plannedResult=+Number(plannedResult).toFixed(2);
+
   return{
     symbol:q.symbol||'XAUUSDm',side,lot:'0.01',open:p,price:p,profit:0,swap:0,commission:0,
-    started:Date.now(),lastSwapKey:'',
-    profitTarget:randomCloseAmount(0.01,100),
-    lossTarget:-randomCloseAmount(0.01,30)
-  }
+    started:Date.now(),lastSwapKey:'',plannedResult,
+    closeAt:Date.now()+randomCloseAmount(20,70)*1000
+  };
 }
 
 async function fetchQuote(){
@@ -341,7 +395,7 @@ async function fetchQuote(){
 function closeOrder(s){
   if(!s.open)return;
   const closedProfit=+Number(s.open.profit).toFixed(2);
-  s.closed.unshift({id:Date.now(),symbol:s.open.symbol,side:s.open.side,lot:s.open.lot,open:s.open.open.toFixed(3),close:s.open.price.toFixed(3),profit:closedProfit,swap:+Number(s.open.swap||0).toFixed(2),commission:+Number(s.open.commission||0).toFixed(2),time:new Date().toISOString()});
+  s.closed.unshift({id:`live-${thaiDateKey()}-${Date.now()}`,symbol:s.open.symbol,side:s.open.side,lot:s.open.lot,open:s.open.open.toFixed(3),close:s.open.price.toFixed(3),profit:closedProfit,swap:+Number(s.open.swap||0).toFixed(2),commission:+Number(s.open.commission||0).toFixed(2),time:new Date().toISOString()});
   s.open=null;save(s)
 }
 async function tick(){
@@ -352,26 +406,20 @@ async function tick(){
 
   const live=!!(q&&q.market_live!==false&&Date.now()-q.receivedAt<10000);
   if(s.auto&&m.open&&live){
-    if(!s.open)s.open=createOrder(q);
+    if(!s.open)s.open=createOrder(s,q);
     else{
-      // Buy ปิดด้วย Bid, Sell ปิดด้วย Ask เพื่อคิดสเปรดเหมือนตลาดจริง
+      // ระหว่างถือออเดอร์ ตัวเลขลอยยังเปลี่ยนตาม Bid/Ask ของราคาทองจริง
       s.open.price=s.open.side==='buy'?q.bid:q.ask;
       s.open.profit=(s.open.side==='buy'?s.open.price-s.open.open:s.open.open-s.open.price)*2.5;
-      if(!Number.isFinite(Number(s.open.profitTarget)))s.open.profitTarget=randomCloseAmount(0.01,100);
-      if(!Number.isFinite(Number(s.open.lossTarget)))s.open.lossTarget=-randomCloseAmount(0.01,30);
+      if(!Number.isFinite(Number(s.open.plannedResult)))s.open=createOrder(s,q);
+      if(!Number.isFinite(Number(s.open.closeAt)))s.open.closeAt=Date.now()+randomCloseAmount(20,70)*1000;
 
-      if(s.open.profit<=s.open.lossTarget){
-        // ใช้ยอดเดียวกันทั้งตอนปิดออเดอร์ ประวัติ และ Balance
-        s.open.profit=+Number(s.open.lossTarget).toFixed(2);
+      if(Date.now()>=s.open.closeAt){
+        // ยอดเดียวกันถูกใช้ทั้งตอนปิด ประวัติ และ Balance
+        s.open.profit=+Number(s.open.plannedResult).toFixed(2);
         closeOrder(s);
         s=load();
-        if(m.open&&live)s.open=createOrder(q);
-      }else if(s.open.profit>=s.open.profitTarget){
-        // ใช้ยอดเดียวกันทั้งตอนปิดออเดอร์ ประวัติ และ Balance
-        s.open.profit=+Number(s.open.profitTarget).toFixed(2);
-        closeOrder(s);
-        s=load();
-        if(m.open&&live)s.open=createOrder(q);
+        if(m.open&&live)s.open=createOrder(s,q);
       }
     }
   }
