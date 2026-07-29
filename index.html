@@ -106,7 +106,7 @@ body.history-mode .totals{padding-bottom:0;margin-top:18px;margin-bottom:18px;tr
 </nav>
 
 <script>
-const KEY='mt5_trade_single_live_v9';
+const KEY='mt5_trade_single_live_v10';
 const PRICE_URL='https://diff-enjoying-recommends-component.trycloudflare.com/price';
 let latestQuote=null;
 let quoteError='';
@@ -114,55 +114,79 @@ let fetchingQuote=false;
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 function money(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function seededTrades(){
-  const start=new Date('2026-03-02T08:15:00+07:00');
-  const end=new Date('2026-07-24T18:30:00+07:00');
-  const target=12486.73;
-  let seed=918273,out=[],daily=[],d=new Date(start),id=1;
+  const baselineKey='2026-07-28';
+  const baselineTarget=25489.00;
+  let seed=918273,out=[],days=[],id=1;
   const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
-  while(d<=end){
-    const day=d.getDay();
-    if(day!==0&&day!==6){
-      const dayTarget=82+rnd()*38;
-      const count=5+Math.floor(rnd()*4);
-      let vals=[],sum=0;
-      for(let i=0;i<count;i++){
-        let p=(i===count-1)?0:(rnd()<0.18?-(4+rnd()*9):(12+rnd()*18));
-        p=+p.toFixed(2);vals.push(p);sum+=p;
-      }
-      vals[count-1]=+(dayTarget-sum).toFixed(2);
-      daily.push({date:new Date(d),vals});
-    }
-    d.setDate(d.getDate()+1);
+  const nowThai=bangkokParts(new Date());
+  const todayKey=`${nowThai.year}-${String(nowThai.month).padStart(2,'0')}-${String(nowThai.day).padStart(2,'0')}`;
+  const endKey=todayKey>baselineKey?todayKey:baselineKey;
+  const d=new Date(Date.UTC(2026,2,2));
+  while(true){
+    const key=`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+    if(key>endKey)break;
+    const wd=d.getUTCDay();
+    if(wd!==0&&wd!==6)days.push(key);
+    d.setUTCDate(d.getUTCDate()+1);
   }
-  let rawTotal=daily.reduce((a,x)=>a+x.vals.reduce((b,v)=>b+v,0),0);
-  const scale=target/rawTotal;
-  let total=0;
-  for(const day of daily){
-    for(let i=0;i<day.vals.length;i++){
-      let p=+(day.vals[i]*scale).toFixed(2);
-      if(day===daily[daily.length-1]&&i===day.vals.length-1)p=+(target-total).toFixed(2);
+
+  const baselineDays=days.filter(key=>key<=baselineKey);
+  const targets=new Map(baselineDays.map(key=>[key,200]));
+  let remaining=Math.round(baselineTarget)-baselineDays.length*200;
+  let cursor=0;
+  while(remaining>0){
+    const key=baselineDays[cursor%baselineDays.length];
+    if(targets.get(key)<300){targets.set(key,targets.get(key)+1);remaining--}
+    cursor+=1+Math.floor(rnd()*7);
+  }
+  for(const key of days)if(!targets.has(key))targets.set(key,200+Math.floor(rnd()*101));
+
+  function splitWins(total,count){
+    const vals=Array(count).fill(50);
+    let left=total-count*50;
+    while(left>0){
+      const i=Math.floor(rnd()*count);
+      if(vals[i]<100){vals[i]++;left--}
+    }
+    return vals;
+  }
+
+  for(const key of days){
+    const dayTarget=targets.get(key);
+    const loss=20+Math.floor(rnd()*11);
+    const winCount=dayTarget<=270?3:4;
+    const vals=[...splitWins(dayTarget+loss,winCount),-loss];
+    for(let i=vals.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[vals[i],vals[j]]=[vals[j],vals[i]]}
+    let hour=6+Math.floor(rnd()*15),minute=Math.floor(rnd()*60);
+    for(const profit of vals){
       const side=rnd()>.49?'buy':'sell';
       const open=4250+(rnd()-.5)*420;
-      const dist=Math.abs(p)/10;
-      const win=p>=0;
+      const dist=Math.abs(profit)/10;
+      const win=profit>=0;
       const close=side==='buy'?open+(win?dist:-dist):open-(win?dist:-dist);
-      const hour=8+Math.floor(rnd()*15),minute=Math.floor(rnd()*60),second=Math.floor(rnd()*60);
-      const t=new Date(day.date);t.setHours(hour,minute,second,0);
-      const heldOvernight=rnd()<0.035;
-      const swap=heldOvernight?+(side==='buy'?-(0.06+rnd()*0.08):-(0.03+rnd()*0.06)).toFixed(2):0;
-      out.push({id:id++,symbol:'XAUUSDm',side,lot:'0.01',open:open.toFixed(3),close:close.toFixed(3),profit:p,swap,commission:0,time:t.toISOString()});
-      total=+(total+p).toFixed(2);
+      minute+=8+Math.floor(rnd()*24);hour+=Math.floor(minute/60);minute%=60;
+      if(hour>22){hour=22;minute=Math.min(minute,58)}
+      const second=Math.floor(rnd()*60);
+      const time=new Date(`${key}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:${String(second).padStart(2,'0')}+07:00`).toISOString();
+      out.push({id:`seed-${key}-${id++}`,symbol:'XAUUSDm',side,lot:'0.01',open:open.toFixed(3),close:close.toFixed(3),profit,swap:0,commission:0,time});
     }
   }
   return out.sort((a,b)=>new Date(b.time)-new Date(a.time));
 }
 function seededWithdrawals(){
-  return[
-    {id:'withdraw-2026-04',amount:600,time:'2026-04-09T10:14:00+07:00',monthKey:'2026-04'},
-    {id:'withdraw-2026-05',amount:600,time:'2026-05-16T11:26:00+07:00',monthKey:'2026-05'},
-    {id:'withdraw-2026-06',amount:600,time:'2026-06-11T09:47:00+07:00',monthKey:'2026-06'},
-    {id:'withdraw-2026-07',amount:600,time:'2026-07-18T13:08:00+07:00',monthKey:'2026-07'}
-  ];
+  let seed=445566;
+  const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+  const out=[];
+  for(const [year,month] of [[2026,4],[2026,5],[2026,6],[2026,7]]){
+    const amount=2000+Math.floor(rnd()*1001);
+    const day=2+Math.floor(rnd()*23);
+    const hour=8+Math.floor(rnd()*13);
+    const minute=Math.floor(rnd()*60);
+    const second=Math.floor(rnd()*60);
+    const mm=String(month).padStart(2,'0'),dd=String(day).padStart(2,'0');
+    out.push({id:`withdraw-${year}-${mm}`,amount,time:`${year}-${mm}-${dd}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:${String(second).padStart(2,'0')}+07:00`,monthKey:`${year}-${mm}`});
+  }
+  return out;
 }
 function defaults(){return{deposit:100,depositTime:'2026-03-02T08:00:00+07:00',withdrawals:seededWithdrawals(),closed:seededTrades(),open:null,auto:true,swapTotal:0,commissionTotal:0,lastSwapKey:''}}
 function normalize(s){
@@ -170,9 +194,12 @@ function normalize(s){
   s=s&&typeof s==='object'?s:d;
   for(const k of Object.keys(d))if(s[k]===undefined)s[k]=d[k];
   if(!Array.isArray(s.closed))s.closed=[];
+  const generated=seededTrades();
+  const existingIds=new Set(s.closed.map(x=>String(x.id)));
+  for(const x of generated)if(!existingIds.has(String(x.id)))s.closed.push(x);
   s.closed=s.closed.map(x=>({...x,swap:Number(x.swap||0),commission:Number(x.commission||0)}));
   if(!Array.isArray(s.withdrawals))s.withdrawals=[];
-  s.withdrawals=s.withdrawals.map(x=>({id:x.id||Date.now(),amount:Math.abs(Number(x.amount||600)),time:x.time||new Date().toISOString(),monthKey:x.monthKey||''}));
+  s.withdrawals=s.withdrawals.map(x=>({id:x.id||Date.now(),amount:Math.abs(Number(x.amount||2000)),time:x.time||new Date().toISOString(),monthKey:x.monthKey||''}));
   return s;
 }
 function load(){try{return normalize(JSON.parse(localStorage.getItem(KEY))||defaults())}catch(e){return defaults()}}
@@ -201,11 +228,12 @@ function marketStatus(date=new Date()){
 function swapKeyAtClose(t){return `${t.year}-${String(t.month).padStart(2,'0')}-${String(t.day).padStart(2,'0')}`}
 
 function withdrawalDueDate(year,month){
-  let day=1;
-  const wd=new Date(Date.UTC(year,month-1,day)).getUTCDay();
-  if(wd===6)day=3;
-  else if(wd===0)day=2;
-  return new Date(Date.UTC(year,month-1,day,3,0,0)); // 10:00 เวลาไทย
+  let seed=year*100+month;
+  const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+  const day=2+Math.floor(rnd()*23);
+  const hour=8+Math.floor(rnd()*13);
+  const minute=Math.floor(rnd()*60);
+  return new Date(`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00+07:00`);
 }
 function maybeApplyMonthlyWithdrawals(s,date=new Date()){
   const start=new Date(s.depositTime||'2026-03-02T08:00:00+07:00');
@@ -217,7 +245,8 @@ function maybeApplyMonthlyWithdrawals(s,date=new Date()){
     const due=withdrawalDueDate(y,m);
     const exists=(s.withdrawals||[]).some(x=>x.monthKey===key);
     if(!exists&&date.getTime()>=due.getTime()&&bal(s)>=600){
-      s.withdrawals.push({id:`withdraw-${key}`,amount:600,time:due.toISOString(),monthKey:key});
+      const amount=2000+((year*37+month*83)%1001);
+      s.withdrawals.push({id:`withdraw-${key}`,amount,time:due.toISOString(),monthKey:key});
     }
     m++;if(m===13){m=1;y++}
   }
@@ -278,7 +307,7 @@ async function tick(){
       // Buy ปิดด้วย Bid, Sell ปิดด้วย Ask เพื่อคิดสเปรดเหมือนตลาดจริง
       s.open.price=s.open.side==='buy'?q.bid:q.ask;
       s.open.profit=(s.open.side==='buy'?s.open.price-s.open.open:s.open.open-s.open.price)*10;
-      if(Date.now()-s.open.started>26000&&(s.open.profit>18||s.open.profit<-7||Date.now()-s.open.started>52000))closeOrder(s)
+      // คงออเดอร์ปัจจุบันไว้เพื่อไม่ให้ยอดกำไรรายวันเกินแผน 200–300 USD
     }
   }
   save(s);renderTrade(s,m,q)
@@ -323,9 +352,9 @@ function renderHistory(filter='all'){
 
   const html=items.map(x=>{
     if(x.kind==='cash'){
-      return `<div class="order"><div class="row"><div class="symbol">${x.type==='deposit'?'เงินฝาก':'การถอน'}</div><div class="profit ${x.amount>=0?'pos':'neg'}">${money(x.amount)}</div></div><div class="sub"><span>${x.type==='deposit'?'Deposit':'Withdrawal'}</span><span>${new Date(x.time).toLocaleString('sv-SE',{timeZone:'Asia/Bangkok'}).replace('T',' ')}</span></div></div>`;
+      return `<div class="order"><div class="row"><div class="symbol">${x.type==='deposit'?'เงินฝาก':'การถอน'}</div><div class="profit ${x.amount>=0?'pos':'neg'}">${money(x.amount)}</div></div><div class="sub"><span>${x.type==='deposit'?'Deposit':'Withdrawal'}</span><span>${new Date(x.time).toLocaleString('sv-SE',{timeZone:'UTC',hour12:false}).replace('T',' ')}</span></div></div>`;
     }
-    return `<div class="order"><div class="row"><div><span class="symbol">${x.symbol}</span> <span class="${x.side}">${x.side} ${x.lot}</span></div><div class="profit ${x.profit>=0?'pos':'neg'}">${money(x.profit)}</div></div><div class="sub"><span>${x.open} → ${x.close}</span><span>${new Date(x.time).toLocaleString('sv-SE',{timeZone:'Asia/Bangkok'}).replace('T',' ')}</span></div></div>`;
+    return `<div class="order"><div class="row"><div><span class="symbol">${x.symbol}</span> <span class="${x.side}">${x.side} ${x.lot}</span></div><div class="profit ${x.profit>=0?'pos':'neg'}">${money(x.profit)}</div></div><div class="sub"><span>${x.open} → ${x.close}</span><span>${new Date(x.time).toLocaleString('sv-SE',{timeZone:'UTC',hour12:false}).replace('T',' ')}</span></div></div>`;
   }).join('');
   $('#historyList').innerHTML=html;
 
