@@ -328,9 +328,10 @@ function renderTrade(s=load(),m=marketStatus(),q=latestQuote){
   $('#floating').style.color=f<0?'var(--red)':'var(--blue)';
   $('#balance').textContent=money(b);
   $('#equity').textContent=money(b+f+openSwap);
-  $('#margin').textContent=s.open?'2.05':'0.00';
-  $('#free').textContent=money(b+f+openSwap-(s.open?2.05:0));
-  $('#level').textContent=s.open?money((b+f+openSwap)/2.05*100):'0.00';
+  const usedMargin=s.open?180.00:0;
+  $('#margin').textContent=money(usedMargin);
+  $('#free').textContent=money(b+f+openSwap-usedMargin);
+  $('#level').textContent=s.open?money((b+f+openSwap)/usedMargin*100):'0.00';
   if(s.open){
     $('#openOrders').innerHTML=`<div class="order"><div class="row"><div><span class="symbol">${s.open.symbol}</span> <span class="${s.open.side}">${s.open.side} ${s.open.lot}</span></div><div class="profit ${s.open.profit>=0?'pos':'neg'}">${money(s.open.profit)}</div></div><div class="sub"><span>${s.open.open.toFixed(3)} → ${s.open.price.toFixed(3)}</span><span></span></div></div>`;
   }else{
