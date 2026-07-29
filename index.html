@@ -106,7 +106,7 @@ body.history-mode .totals{padding-bottom:0;margin-top:18px;margin-bottom:18px;tr
 </nav>
 
 <script>
-const KEY='mt5_trade_single_live_v10';
+const KEY='mt5_trade_single_live_v11';
 const PRICE_URL='https://diff-enjoying-recommends-component.trycloudflare.com/price';
 let latestQuote=null;
 let quoteError='';
@@ -168,7 +168,17 @@ function seededTrades(){
       if(hour>22){hour=22;minute=Math.min(minute,58)}
       const second=Math.floor(rnd()*60);
       const time=new Date(`${key}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:${String(second).padStart(2,'0')}+07:00`).toISOString();
-      out.push({id:`seed-${key}-${id++}`,symbol:'XAUUSDm',side,lot:'0.01',open:open.toFixed(3),close:close.toFixed(3),profit,swap:0,commission:0,time});
+      const tradeId=id++;
+      // บางออเดอร์ถือข้ามคืน จึงมีค่า Swap ในประวัติ (วันพุธคิดมากขึ้น)
+      const heldOvernight=(tradeId%17===0)||(tradeId%29===0);
+      const weekday=new Date(`${key}T12:00:00+07:00`).getDay();
+      let swap=0;
+      if(heldOvernight){
+        const base=side==='buy'?(0.07+rnd()*0.07):(0.04+rnd()*0.06);
+        swap=-(weekday===3?base*3:base);
+        swap=+swap.toFixed(2);
+      }
+      out.push({id:`seed-${key}-${tradeId}`,symbol:'XAUUSDm',side,lot:'0.01',open:open.toFixed(3),close:close.toFixed(3),profit,swap,commission:0,time});
     }
   }
   return out.sort((a,b)=>new Date(b.time)-new Date(a.time));
@@ -354,7 +364,8 @@ function renderHistory(filter='all'){
     if(x.kind==='cash'){
       return `<div class="order"><div class="row"><div class="symbol">${x.type==='deposit'?'เงินฝาก':'การถอน'}</div><div class="profit ${x.amount>=0?'pos':'neg'}">${money(x.amount)}</div></div><div class="sub"><span>${x.type==='deposit'?'Deposit':'Withdrawal'}</span><span>${new Date(x.time).toLocaleString('sv-SE',{timeZone:'UTC',hour12:false}).replace('T',' ')}</span></div></div>`;
     }
-    return `<div class="order"><div class="row"><div><span class="symbol">${x.symbol}</span> <span class="${x.side}">${x.side} ${x.lot}</span></div><div class="profit ${x.profit>=0?'pos':'neg'}">${money(x.profit)}</div></div><div class="sub"><span>${x.open} → ${x.close}</span><span>${new Date(x.time).toLocaleString('sv-SE',{timeZone:'UTC',hour12:false}).replace('T',' ')}</span></div></div>`;
+    const swapText=Number(x.swap||0)!==0?` · Swap ${money(x.swap)}`:'';
+    return `<div class="order"><div class="row"><div><span class="symbol">${x.symbol}</span> <span class="${x.side}">${x.side} ${x.lot}</span></div><div class="profit ${x.profit>=0?'pos':'neg'}">${money(x.profit)}</div></div><div class="sub"><span>${x.open} → ${x.close}${swapText}</span><span>${new Date(x.time).toLocaleString('sv-SE',{timeZone:'UTC',hour12:false}).replace('T',' ')}</span></div></div>`;
   }).join('');
   $('#historyList').innerHTML=html;
 
