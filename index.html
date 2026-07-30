@@ -151,39 +151,18 @@ function seededTrades(){
 
   // แบ่งยอดกำไรเป็นออเดอร์ละ 50.00–100.00 USD โดยมีเศษสตางค์
   function splitWinsCents(totalCents,count){
-    const vals=Array(count).fill(5000);
-    let left=totalCents-count*5000;
+    const vals=[];let rem=totalCents;
     for(let i=0;i<count;i++){
-      const slots=count-i-1;
-      const minForRest=0;
-      const maxHere=Math.min(5000,left-minForRest);
-      const add=i===count-1?left:Math.floor(rnd()*(maxHere+1));
-      vals[i]+=add;
-      left-=add;
-    }
-    // กระจายใหม่หากตัวท้ายเกินขอบเขต และทำให้รายการส่วนใหญ่มีทศนิยมไม่กลม
-    for(let i=count-1;i>=0;i--){
-      if(vals[i]>10000){
-        let extra=vals[i]-10000; vals[i]=10000;
-        for(let j=0;j<count&&extra>0;j++){
-          if(j===i)continue;
-          const give=Math.min(extra,10000-vals[j]);
-          vals[j]+=give;extra-=give;
-        }
-      }
-    }
-    for(let i=0;i<count;i++){
-      if(vals[i]%100===0){
-        const j=(i+1)%count;
-        if(vals[i]<10000&&vals[j]>5000){vals[i]+=37;vals[j]-=37}
-      }
+      const left=count-i-1;const maxHere=Math.min(5000,rem);
+      const v=i===count-1?rem:Math.floor(Math.random()*(maxHere+1));
+      vals.push(v);rem-=v;
     }
     return vals;
   }
 
   for(const key of days){
     const dayTargetCents=targets.get(key);
-    let lossCents=2000+Math.floor(rnd()*1001);
+    let lossCents=Math.floor(rnd()*3001);
     if(lossCents%100===0)lossCents+=47;
     const winCount=dayTargetCents<=27000?3:4;
     const valsCents=[...splitWinsCents(dayTargetCents+lossCents,winCount),-lossCents];
@@ -339,13 +318,13 @@ function createOrder(s,q){
   // และหลังถึงเป้าแล้ว ออเดอร์ยังเปิด–ปิดต่อโดยยอดรวมจะไม่หลุดช่วง 200–300 USD
   let plannedResult;
   if(made<target){
-    // เร่งให้ถึงเป้าของวันแน่นอน: ไม้หลักเป็นกำไร 0.01–100.00 USD
+    // เร่งให้ถึงเป้าของวันแน่นอน: ไม้หลักเป็นกำไร 0.01–50.00 USD
     // แทรกไม้ขาดทุนได้เฉพาะเมื่อยังมีระยะพอ และไม่ทำให้การไล่เป้าหยุดลง
     if(made>=60&&remaining>60&&Math.random()<0.18){
-      plannedResult=-randomCloseAmount(0.01,Math.min(30,made));
+      plannedResult=-randomCloseAmount(0.01,Math.min(20,made));
     }else{
-      const maxWin=Math.min(100,remaining);
-      const minWin=Math.min(maxWin,Math.max(0.01,Math.min(35,remaining)));
+      const maxWin=Math.min(50,remaining);
+      const minWin=Math.min(maxWin,Math.max(0.01,Math.min(20,remaining)));
       plannedResult=remaining<=100?remaining:randomCloseAmount(minWin,maxWin);
     }
   }else{
@@ -358,7 +337,7 @@ function createOrder(s,q){
     if(canLose&&(!canWin||Math.random()<0.55)){
       plannedResult=-randomCloseAmount(0.01,Math.min(30,lossRoom));
     }else if(canWin){
-      plannedResult=randomCloseAmount(0.01,Math.min(100,profitRoom));
+      plannedResult=randomCloseAmount(0.01,Math.min(50,profitRoom));
     }else{
       // กรณีขอบเขตพอดี ให้ขาดทุนเล็กน้อยก่อน แล้วไม้ถัดไปจะชดเชยภายในช่วงเดิม
       plannedResult=-Math.min(0.01,Math.max(0.01,lossRoom));
