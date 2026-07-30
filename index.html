@@ -217,7 +217,17 @@ function normalize(s){
   const generated=seededTrades();
   const existingIds=new Set(s.closed.map(x=>String(x.id)));
   for(const x of generated)if(!existingIds.has(String(x.id)))s.closed.push(x);
-  s.closed=s.closed.map(x=>({...x,swap:Number(x.swap||0),commission:Number(x.commission||0)}));
+  s.closed=s.closed.map(x=>{
+    const item={...x,swap:Number(x.swap||0),commission:Number(x.commission||0)};
+    const open=Number(item.open),profit=Number(item.profit||0);
+    if(Number.isFinite(open)&&Number.isFinite(profit)&&(item.side==='buy'||item.side==='sell')){
+      // ทำให้ราคาปิดสัมพันธ์กับกำไร/ขาดทุน โดยใช้สูตรเดียวกับกำไรลอยบนหน้าเทรด
+      const close=item.side==='buy'?open+(profit/10):open-(profit/10);
+      item.open=open.toFixed(3);
+      item.close=close.toFixed(3);
+    }
+    return item;
+  });
   const nowThai=bangkokParts(new Date());
   const todayKey=`${nowThai.year}-${String(nowThai.month).padStart(2,'0')}-${String(nowThai.day).padStart(2,'0')}`;
   // ไม่ใช้รายการ seed ของวันนี้ เพื่อให้กำไรวันนี้เกิดจากออเดอร์ที่ปิดจริงบนหน้าเว็บ
@@ -374,7 +384,11 @@ async function fetchQuote(){
 function closeOrder(s){
   if(!s.open)return;
   const closedProfit=+Number(s.open.profit).toFixed(2);
-  s.closed.unshift({id:`live-${thaiDateKey()}-${Date.now()}`,symbol:s.open.symbol,side:s.open.side,lot:s.open.lot,open:s.open.open.toFixed(3),close:s.open.price.toFixed(3),profit:closedProfit,swap:+Number(s.open.swap||0).toFixed(2),commission:+Number(s.open.commission||0).toFixed(2),time:new Date().toISOString()});
+  // ราคาปิดในประวัติคำนวณจากยอดกำไร/ขาดทุน เพื่อให้ตัวเลขสัมพันธ์กันเสมอ
+  const historyClose=s.open.side==='buy'
+    ? Number(s.open.open)+(closedProfit/10)
+    : Number(s.open.open)-(closedProfit/10);
+  s.closed.unshift({id:`live-${thaiDateKey()}-${Date.now()}`,symbol:s.open.symbol,side:s.open.side,lot:s.open.lot,open:Number(s.open.open).toFixed(3),close:historyClose.toFixed(3),profit:closedProfit,swap:+Number(s.open.swap||0).toFixed(2),commission:+Number(s.open.commission||0).toFixed(2),time:new Date().toISOString()});
   s.open=null;save(s)
 }
 async function tick(){
